@@ -16,17 +16,17 @@ Tech Stack  -
 * Firebase 
 * Glide Library
 <p float="left">
-  <img src="images/home.png" width="400" />&nbsp
-  <img src="images/searchanime.png" width="400" /> 
+  <img src="images/home.jpg" width="400" />&nbsp
+  <img src="images/searchanime.jpg" width="400" /> 
 </p>
 </br>
 </br>
 <p float="left">
-  <img src="images/posts.png" width="400" margin-left="100px"/>
-  <img src="images/char.png" width="400" /> 
+  <img src="images/posts.jpg" width="400" margin-left="100px"/>
+  <img src="images/char.jpg" width="400" /> 
 </p>
 </br>
 </br>
 <p float="left">
-  <img src="images/videos.png" width="400" />
+  <img src="images/videos.jpg" width="400" />
 </p>
