@@ -16,7 +16,7 @@ Tech Stack  -
 * Firebase 
 * Glide Library
 <p float="left">
-  <img src="images/home.jpg" width="400" height = "600"/>&nbsp
+  <img src="images/home.jpg" width="400" height = "800"/>&nbsp
   <img src="images/searchanime.jpg" width="400" /> 
 </p>
 </br>
