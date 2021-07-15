@@ -23,7 +23,7 @@ Tech Stack  -
 </br>
 <p float="left">
   <img src="images/posts.jpg" width="400" margin-left="100px"/>
-  <img src="images/char.jpg" width="400" /> 
+  <img src="images/chat.jpg" width="400" /> 
 </p>
 </br>
 </br>
