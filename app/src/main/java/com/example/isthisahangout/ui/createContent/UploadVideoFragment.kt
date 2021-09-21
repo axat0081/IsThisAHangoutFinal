@@ -5,12 +5,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bumptech.glide.Glide
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
+import com.canhub.cropper.options
 import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.FragmentUploadVideoBinding
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
@@ -25,6 +31,7 @@ class UploadVideoFragment : Fragment(R.layout.fragment_upload_video) {
     private var _binding: FragmentUploadVideoBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<VideoViewModel>()
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentUploadVideoBinding.bind(view)
@@ -35,12 +42,24 @@ class UploadVideoFragment : Fragment(R.layout.fragment_upload_video) {
                         viewModel.videoUrl = uri
                     }
                 }
-            val getVideoThumbnail =
-                registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                    if (uri != null) {
-                        viewModel.videoThumbnail = uri
+            cropImage = registerForActivityResult(CropImageContract()) { result ->
+                if (result.isSuccessful) {
+                    val uri = result.uriContent
+                    viewModel.videoThumbnail = uri
+                    Glide.with(requireContext())
+                        .load(uri)
+                        .into(binding.cropImageView)
+                } else {
+                    val error = result.error
+                    error?.let { exception ->
+                        Snackbar.make(
+                            requireView(),
+                            exception.localizedMessage!!.toString(),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
                     }
                 }
+            }
             videoTitleEditText.editText!!.addTextChangedListener { title ->
                 viewModel.videoTitle = title.toString()
             }
@@ -51,7 +70,13 @@ class UploadVideoFragment : Fragment(R.layout.fragment_upload_video) {
                 getVideoUri.launch("video/*")
             }
             selectThumbnailButton.setOnClickListener {
-                getVideoThumbnail.launch("image/*")
+                cropImage.launch(
+                    options {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1920, 1080)
+                            .setCropShape(CropImageView.CropShape.RECTANGLE)
+                    }
+                )
             }
             uploadSongButton.setOnClickListener {
                 hideKeyboard(requireContext())

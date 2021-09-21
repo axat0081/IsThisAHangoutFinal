@@ -26,10 +26,11 @@ class PostsFragment : Fragment(R.layout.fragment_posts), PostsPagingAdapter.OnIt
     private var _binding: FragmentPostsBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<PostViewModel>()
+    private lateinit var postsRecyclerAdapter: PostsRecyclerAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentPostsBinding.bind(view)
-        val postsRecyclerAdapter = PostsRecyclerAdapter(this)
+        postsRecyclerAdapter = PostsRecyclerAdapter(this)
         val postsPagingAdapter = PostsPagingAdapter(this)
         val concatAdapter = ConcatAdapter(
             postsRecyclerAdapter,
@@ -101,6 +102,16 @@ class PostsFragment : Fragment(R.layout.fragment_posts), PostsPagingAdapter.OnIt
                 )
             )
         )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        postsRecyclerAdapter.startListening()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        postsRecyclerAdapter.stopListening()
     }
 
     override fun onDestroy() {

@@ -126,4 +126,7 @@ dependencies {
 
     //ZoomImageView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //ImageCropperLibrary
+    implementation 'com.github.CanHub:Android-Image-Cropper:3.3.5'
 }

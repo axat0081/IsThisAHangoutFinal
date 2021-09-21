@@ -1,17 +1,21 @@
 package com.example.isthisahangout.ui.createContent
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
+import com.canhub.cropper.options
 import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.FragmentCreatePostBinding
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
@@ -26,15 +30,28 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
     private var _binding: FragmentCreatePostBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<PostViewModel>()
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentCreatePostBinding.bind(view)
-        val getPostImage =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    viewModel.postImage = uri
+        cropImage = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                val uri = result.uriContent
+                viewModel.postImage = uri
+                Glide.with(requireContext())
+                    .load(uri)
+                    .into(binding.croppedPostImageView)
+            } else {
+                val error = result.error
+                error?.let { exception ->
+                    Snackbar.make(
+                        requireView(),
+                        exception.localizedMessage!!.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
             }
+        }
         binding.apply {
             postTitleEditText.editText!!.addTextChangedListener { title ->
                 viewModel.postTitle = title.toString()
@@ -43,7 +60,13 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
                 viewModel.postText = text.toString()
             }
             uploadImageButton.setOnClickListener {
-                getPostImage.launch("image/*")
+                cropImage.launch(
+                    options {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1920, 1080)
+                            .setCropShape(CropImageView.CropShape.RECTANGLE)
+                    }
+                )
             }
             createPostsButton.setOnClickListener {
                 hideKeyboard(requireContext())

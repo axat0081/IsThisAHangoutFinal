@@ -68,11 +68,23 @@
         android:layout_toEndOf="@id/select_video_button"
         android:src="@drawable/image" />
 
+    <ImageView
+        android:id="@+id/crop_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/video_text_edit_text"
+        android:layout_marginTop="20dp"
+        android:layout_toEndOf="@id/select_thumbnail_button"
+        android:layout_marginStart="20dp"
+        tools:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
+        android:layout_marginEnd="30dp"/>
+
     <Button
         android:id="@+id/upload_song_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/video_text_edit_text"
+        android:layout_below="@id/crop_image_view"
         android:layout_marginStart="40dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"

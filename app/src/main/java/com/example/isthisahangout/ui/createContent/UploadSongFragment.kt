@@ -5,12 +5,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bumptech.glide.Glide
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
+import com.canhub.cropper.options
 import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.FragmentUploadSongBinding
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
@@ -25,6 +31,7 @@ class UploadSongFragment : Fragment(R.layout.fragment_upload_song) {
     private var _binding: FragmentUploadSongBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<SongViewModel>()
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentUploadSongBinding.bind(view)
@@ -34,12 +41,24 @@ class UploadSongFragment : Fragment(R.layout.fragment_upload_song) {
                     viewModel.songUrl = uri
                 }
             }
-        val getSongThumbnail =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                if (uri != null) {
-                    viewModel.songThumbnail = uri
+        cropImage = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                val uri = result.uriContent
+                viewModel.songThumbnail = uri
+                Glide.with(requireContext())
+                    .load(uri)
+                    .into(binding.cropImageView)
+            } else {
+                val error = result.error
+                error?.let { exception ->
+                    Snackbar.make(
+                        requireView(),
+                        exception.localizedMessage!!.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
             }
+        }
         binding.apply {
             songTitleEditText.editText!!.addTextChangedListener { title ->
                 viewModel.songTitle = title.toString()
@@ -51,7 +70,13 @@ class UploadSongFragment : Fragment(R.layout.fragment_upload_song) {
                 getSongUri.launch("audio/*")
             }
             selectThumbnailButton.setOnClickListener {
-                getSongThumbnail.launch("image/*")
+                cropImage.launch(
+                    options {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1920, 1080)
+                            .setCropShape(CropImageView.CropShape.RECTANGLE)
+                    }
+                )
             }
             uploadSongButton.setOnClickListener {
                 hideKeyboard(requireContext())
