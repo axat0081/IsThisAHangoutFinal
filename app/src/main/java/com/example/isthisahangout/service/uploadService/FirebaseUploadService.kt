@@ -9,8 +9,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.models.FirebasePost
+import com.example.isthisahangout.models.FirebaseVideo
 import com.example.isthisahangout.models.Song
-import com.example.isthisahangout.models.Video
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.firestore.CollectionReference
@@ -129,7 +129,7 @@ class FirebaseUploadService : BaseService() {
                     uploadSong(song)
                 }
                 "video" -> {
-                    val video = intent.getParcelableExtra<Video>(FIREBASE_VIDEO)!!
+                    val video = intent.getParcelableExtra<FirebaseVideo>(FIREBASE_VIDEO)!!
                     uploadVideo(video)
                 }
 
@@ -462,7 +462,7 @@ class FirebaseUploadService : BaseService() {
         }
     }
 
-    private fun uploadVideo(video: Video) {
+    private fun uploadVideo(video: FirebaseVideo) {
         taskStarted()
         showProgressNotification(UPLOAD_VIDEO_CAPTION, 0, 0, true)
         val videoUrl: Uri = Uri.parse(video.url)
@@ -511,7 +511,7 @@ class FirebaseUploadService : BaseService() {
                             }.addOnSuccessListener { thumbnailUri ->
                                 val id = videoCollectionRef.document().id
                                 videoCollectionRef.document(id).set(
-                                    Video(
+                                    FirebaseVideo(
                                         id = id,
                                         text = video.text,
                                         title = video.title,

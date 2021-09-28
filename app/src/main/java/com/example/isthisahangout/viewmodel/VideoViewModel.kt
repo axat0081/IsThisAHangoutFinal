@@ -15,7 +15,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.Comments
-import com.example.isthisahangout.models.Video
+import com.example.isthisahangout.models.FirebaseVideo
 import com.example.isthisahangout.models.favourites.FavVideo
 import com.example.isthisahangout.pagingsource.VideosPagingSource
 import com.example.isthisahangout.room.favourites.FavouritesDao
@@ -23,6 +23,8 @@ import com.example.isthisahangout.service.uploadService.FirebaseUploadService
 import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,11 +39,9 @@ class VideoViewModel @Inject constructor(
     private val videoEventChannel = Channel<VideoEvent>()
     val videoEventFlow = videoEventChannel.receiveAsFlow()
 
-    private val videoId = MutableLiveData("ewuofnn")
+    private val videoId = MutableLiveData("any_video_id")
     val showDetails = MutableLiveData(false)
     val isBookMarked = MutableLiveData(false)
-
-    var simpleExoPlayer:SimpleExoPlayer? = null
 
     var videoTitle = state.get<String>("video_title") ?: ""
         set(value) {
@@ -85,16 +85,16 @@ class VideoViewModel @Inject constructor(
         }
     }
 
-
     val videos = Pager(PagingConfig(10)) {
         VideosPagingSource()
     }.flow.cachedIn(viewModelScope)
+
 
     fun onShowDetailsClick() {
         showDetails.value = !showDetails.value!!
     }
 
-    fun onBookMarkClick(video: Video) {
+    fun onBookMarkClick(video: FirebaseVideo) {
         isBookMarked.value = !isBookMarked.value!!
         if (!isBookMarked.value!!) {
             viewModelScope.launch {
@@ -122,7 +122,7 @@ class VideoViewModel @Inject constructor(
         }
     }
 
-    fun onCommentSendClick(video: Video) {
+    fun onCommentSendClick(video: FirebaseVideo) {
         if (commentText.isNullOrBlank()) {
             viewModelScope.launch {
                 videoEventChannel.send(VideoEvent.UploadVideoError("Comment cannot be blank"))
@@ -164,7 +164,7 @@ class VideoViewModel @Inject constructor(
                 }
             }
             else -> {
-                val video = Video(
+                val video = FirebaseVideo(
                     id = null,
                     title = videoTitle,
                     text = videoText,

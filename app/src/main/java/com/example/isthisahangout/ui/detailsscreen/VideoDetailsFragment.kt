@@ -2,11 +2,10 @@ package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -15,12 +14,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.CommentsAdapter
 import com.example.isthisahangout.databinding.FragmentVideoDetailsBinding
 import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
+import com.example.isthisahangout.viewmodel.PlayVideoViewModel
 import com.example.isthisahangout.viewmodel.VideoViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -42,17 +45,15 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
     private var _binding: FragmentVideoDetailsBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<VideoViewModel>()
+    private val playVideoViewModel by viewModels<PlayVideoViewModel>()
     private val favViewModel by viewModels<FavouritesViewModel>()
     private val args by navArgs<VideoDetailsFragmentArgs>()
- /*   private lateinit var simpleExoPlayer: SimpleExoPlayer*/
 
-    /*private lateinit var loadControl: LoadControl
-    private lateinit var bandwidthMeter: BandwidthMeter
-    private lateinit var trackSelector: TrackSelector*/
     @Inject
     @Named("CommentsRef")
     lateinit var commentsRef: CollectionReference
     private lateinit var commentsAdapter: CommentsAdapter
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentVideoDetailsBinding.bind(view)
@@ -66,28 +67,23 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
             )
             .build()
         commentsAdapter = CommentsAdapter(options)
-        val getCommentImage =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    viewModel.commentImage = uri
-                    binding.addCommentImageView.isVisible = true
-                    Glide.with(requireContext())
-                        .load(uri)
-                        .into(binding.addCommentImageView)
+        cropImage = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                val uri = result.uriContent
+                viewModel.commentImage = uri
+            } else {
+                val error = result.error
+                error?.let { exception ->
+                    Snackbar.make(
+                        requireView(),
+                        exception.localizedMessage!!.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
             }
-        /*  loadControl = DefaultLoadControl()
-          bandwidthMeter = DefaultBandwidthMeter()
-          trackSelector = DefaultTrackSelector(AdaptiveTrackSelection.Factory(bandwidthMeter))
-          simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(
-              requireContext(),
-              trackSelector,
-              loadControl
-          )*/
-        viewModel.simpleExoPlayer = SimpleExoPlayer.Builder(requireActivity().applicationContext).build()
+        }
 
         binding.apply {
-
             addCommentImageView.isVisible = false
             commentRecyclerView.apply {
                 layoutManager =
@@ -97,8 +93,13 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                 isVisible = true
             }
 
-            playerView.player = viewModel.simpleExoPlayer
-            viewModel.simpleExoPlayer!!.setSource(requireActivity().applicationContext, video.url!!)
+            if(playVideoViewModel.simpleExoPlayer == null) {
+                playVideoViewModel.simpleExoPlayer =
+                    SimpleExoPlayer.Builder(requireActivity().applicationContext).build()
+                playerView.player = playVideoViewModel.simpleExoPlayer
+                playVideoViewModel.simpleExoPlayer!!.setSource(requireActivity().applicationContext, video.url!!)
+            }
+
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 favViewModel.favVideo.collect { favVideos ->
                     val isFav = favVideos.any {
@@ -153,7 +154,13 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                 .into(uploaderPfpImageView)
 
             addCommentImageButton.setOnClickListener {
-                getCommentImage.launch("image/*")
+                cropImage.launch(
+                    com.canhub.cropper.options {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1920, 1080)
+                            .setCropShape(CropImageView.CropShape.RECTANGLE)
+                    }
+                )
             }
 
             commentEditText.addTextChangedListener { text ->
@@ -191,12 +198,12 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+ /*   override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if(viewModel.simpleExoPlayer!=null){
-            outState.putLong(PLAYER_POSITION, viewModel.simpleExoPlayer!!.contentPosition)
+        if (playVideoViewModel.simpleExoPlayer != null) {
+            outState.putLong(PLAYER_POSITION, playVideoViewModel.simpleExoPlayer!!.contentPosition)
         }
-    }
+    }*/
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -207,12 +214,12 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
         }
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+   /* override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         savedInstanceState?.let { state ->
-            viewModel.simpleExoPlayer?.seekTo(state.getLong(PLAYER_POSITION))
+            playVideoViewModel.simpleExoPlayer?.seekTo(state.getLong(PLAYER_POSITION))
         }
-    }
+    }*/
 
     override fun onStart() {
         super.onStart()
@@ -221,7 +228,6 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
 
     override fun onStop() {
         super.onStop()
-        viewModel.simpleExoPlayer?.release()
         commentsAdapter.stopListening()
     }
 
@@ -237,5 +243,7 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        playVideoViewModel.simpleExoPlayer?.release()
+        playVideoViewModel.simpleExoPlayer = null
     }
 }

@@ -3,7 +3,6 @@ package com.example.isthisahangout.pagingsource
 import android.util.Log
 import androidx.paging.PagingSource
 import com.example.isthisahangout.models.Song
-import com.example.isthisahangout.models.Video
 import com.example.isthisahangout.utils.songQuery
 import com.example.isthisahangout.utils.videoQuery
 import com.google.firebase.firestore.QuerySnapshot

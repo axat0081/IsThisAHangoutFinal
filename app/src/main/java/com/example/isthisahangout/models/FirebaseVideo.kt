@@ -1,5 +1,9 @@
 package com.example.isthisahangout.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class FirebaseVideo(
     val id: String? = null,
     val url: String? = null,
@@ -12,5 +16,5 @@ data class FirebaseVideo(
     val image: String? = null,
     var likes: Int? = null,
     val thumbnail: String? = null
-)
+):Parcelable
 

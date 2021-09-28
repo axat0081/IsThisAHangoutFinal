@@ -14,17 +14,20 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.example.isthisahangout.databinding.VideoDisplayLayoutBinding
-import com.example.isthisahangout.models.Video
+import com.example.isthisahangout.models.FirebaseVideo
 
-class VideosAdapter(private val listener: OnItemClickListener) :
-    PagingDataAdapter<Video, VideosAdapter.VideosViewHolder>(COMPARATOR) {
+class VideosPagingAdapter(private val listener: OnItemClickListener) :
+    PagingDataAdapter<FirebaseVideo, VideosPagingAdapter.VideosViewHolder>(COMPARATOR) {
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<Video>() {
-            override fun areItemsTheSame(oldItem: Video, newItem: Video): Boolean =
+        val COMPARATOR = object : DiffUtil.ItemCallback<FirebaseVideo>() {
+            override fun areItemsTheSame(oldItem: FirebaseVideo, newItem: FirebaseVideo): Boolean =
                 oldItem == newItem
 
-            override fun areContentsTheSame(oldItem: Video, newItem: Video): Boolean =
+            override fun areContentsTheSame(
+                oldItem: FirebaseVideo,
+                newItem: FirebaseVideo
+            ): Boolean =
                 oldItem.id == newItem.id
         }
     }
@@ -42,7 +45,7 @@ class VideosAdapter(private val listener: OnItemClickListener) :
     }
 
     interface OnItemClickListener {
-        fun onItemClick(video: Video)
+        fun onItemClick(video: FirebaseVideo)
     }
 
     inner class VideosViewHolder(private val binding: VideoDisplayLayoutBinding) :
@@ -60,11 +63,11 @@ class VideosAdapter(private val listener: OnItemClickListener) :
             }
         }
 
-        fun bind(video: Video) {
+        fun bind(video: FirebaseVideo) {
             binding.apply {
                 Glide.with(itemView)
                     .load(video.thumbnail)
-                    .apply(object: RequestOptions(){}.override(600, 200))
+                    .apply(object : RequestOptions() {}.override(600, 200))
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(
                             e: GlideException?,

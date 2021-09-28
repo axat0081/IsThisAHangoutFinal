@@ -255,6 +255,6 @@
         tools:layout="@layout/fragment_video_details">
         <argument
             android:name="video"
-            app:argType="com.example.isthisahangout.models.Video" />
+            app:argType="com.example.isthisahangout.models.FirebaseVideo" />
     </fragment>
 </navigation>
