@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -19,6 +20,9 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.CommentsAdapter
@@ -29,6 +33,7 @@ import com.example.isthisahangout.models.favourites.FavPost
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
 import com.example.isthisahangout.viewmodel.PostViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,7 +49,7 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
     private val args by navArgs<PostsDetailsFragmentArgs>()
     private val viewModel by viewModels<PostViewModel>()
     private val favViewModel by viewModels<FavouritesViewModel>()
-
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     @Inject
     @Named("CommentsRef")
     lateinit var commentsRef: CollectionReference
@@ -62,16 +67,24 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
             )
             .build()
         commentsAdapter = CommentsAdapter(options)
-        val getCommentImage =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    viewModel.commentImage = uri
-                    binding.addCommentImageView.isVisible = true
-                    Glide.with(requireContext())
-                        .load(uri)
-                        .into(binding.addCommentImageView)
+        cropImage = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                val uri = result.uriContent
+                viewModel.commentImage = uri
+                Glide.with(requireContext())
+                    .load(uri)
+                    .into(binding.addCommentImageView)
+            } else {
+                val error = result.error
+                error?.let { exception ->
+                    Snackbar.make(
+                        requireView(),
+                        exception.localizedMessage!!.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
             }
+        }
         binding.apply {
             addCommentImageView.isVisible = false
             bookmarkImageView.setImageResource(R.drawable.bookmark)
@@ -151,7 +164,13 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
             }
 
             addCommentImageButton.setOnClickListener {
-                getCommentImage.launch("image/*")
+                cropImage.launch(
+                    com.canhub.cropper.options {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1920, 1080)
+                            .setCropShape(CropImageView.CropShape.RECTANGLE)
+                    }
+                )
             }
 
             commentEditText.addTextChangedListener { text ->

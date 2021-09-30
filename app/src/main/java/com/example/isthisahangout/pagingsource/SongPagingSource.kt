@@ -13,9 +13,8 @@ class SongPagingSource : PagingSource<QuerySnapshot, Song>() {
         return try {
             val currentPage = params.key ?: songQuery.limit(10).get().await()
             val lastDocumentSnapshot = currentPage.documents[currentPage.size() - 1]
-            val nextPage = videoQuery.limit(10).startAfter(lastDocumentSnapshot)
+            val nextPage = songQuery.limit(10).startAfter(lastDocumentSnapshot)
                 .get().await()
-            Log.e("Posts", currentPage.documents.toString())
             LoadResult.Page(
                 data = currentPage.toObjects(Song::class.java),
                 prevKey = null,

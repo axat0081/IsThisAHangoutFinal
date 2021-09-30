@@ -25,7 +25,7 @@ import javax.inject.Singleton
 class AnimeRepository @Inject constructor(
     val api: AnimeAPI,
     val db: AnimeDatabase,
-    val quoteAPI: AnimeQuoteAPI
+    private val quoteAPI: AnimeQuoteAPI
 ) {
     private val upcomingAnimeDao = db.getUpcomingAnimeDao()
     private val airingAnimeDao = db.getAiringAnimeDoa()
@@ -167,4 +167,6 @@ class AnimeRepository @Inject constructor(
                 onFetchFailed(t)
             }
         )
+
+
 }

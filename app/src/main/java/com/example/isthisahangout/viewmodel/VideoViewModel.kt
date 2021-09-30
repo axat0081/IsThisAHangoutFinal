@@ -80,7 +80,6 @@ class VideoViewModel @Inject constructor(
 
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            Log.e("FirebaseAuthViewModel", "onReceive:$intent")
             videoUploadResult(intent)
         }
     }

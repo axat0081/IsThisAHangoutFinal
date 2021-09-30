@@ -30,4 +30,9 @@ interface AnimeAPI {
         @Path("season") season: String,
         @Path("year") year: String
     ): AnimeSeasonResults
+
+    @GET("search/anime")
+    suspend fun getAnimebyName(
+        @Query("q") name: String
+    ): AnimeGenreResults
 }

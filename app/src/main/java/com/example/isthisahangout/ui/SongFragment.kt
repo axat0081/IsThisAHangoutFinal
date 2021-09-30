@@ -57,7 +57,7 @@ class SongFragment : Fragment(R.layout.fragment_song), SongAdapter.OnItemClickLi
     }
 
     override fun onItemClick(song: Song) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onDestroy() {

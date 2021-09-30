@@ -1,7 +1,6 @@
 package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -10,55 +9,41 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.CommentsAdapter
-import com.example.isthisahangout.databinding.FragmentVideoDetailsBinding
+import com.example.isthisahangout.databinding.FragmentSongDetailBinding
 import com.example.isthisahangout.models.Comments
-import com.example.isthisahangout.viewmodel.FavouritesViewModel
-import com.example.isthisahangout.viewmodel.PlayVideoViewModel
-import com.example.isthisahangout.viewmodel.VideoViewModel
+import com.example.isthisahangout.viewmodel.SongDetailViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
-import com.norulab.exofullscreen.setSource
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import java.lang.Integer.min
 import java.text.DateFormat
 import javax.inject.Inject
 import javax.inject.Named
 
-const val PLAYER_POSITION = "Player postiion"
-
-@AndroidEntryPoint
-class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
-    private var _binding: FragmentVideoDetailsBinding? = null
+class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
+    private var _binding: FragmentSongDetailBinding? = null
     private val binding get() = _binding!!
-    private val viewModel by viewModels<VideoViewModel>()
-    private val playVideoViewModel by viewModels<PlayVideoViewModel>()
-    private val favViewModel by viewModels<FavouritesViewModel>()
-    private val args by navArgs<VideoDetailsFragmentArgs>()
+    private lateinit var commentsAdapter: CommentsAdapter
 
     @Inject
     @Named("CommentsRef")
     lateinit var commentsRef: CollectionReference
-    private lateinit var commentsAdapter: CommentsAdapter
+    private val args by navArgs<SongDetailFragmentArgs>()
     private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
+    private val viewModel by viewModels<SongDetailViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentVideoDetailsBinding.bind(view)
-        val video = args.video
-        val query = commentsRef.document(video.id!!).collection("comments")
+        _binding = FragmentSongDetailBinding.bind(view)
+        val song = args.song
+        val query = commentsRef.document(song.id!!).collection("comments")
             .orderBy("time", Query.Direction.DESCENDING)
         val options = FirestoreRecyclerOptions.Builder<Comments>()
             .setQuery(
@@ -85,9 +70,7 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                 }
             }
         }
-
         binding.apply {
-
             commentRecyclerView.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -95,26 +78,6 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                 itemAnimator = null
                 isVisible = true
             }
-
-            if (playVideoViewModel.simpleExoPlayer == null) {
-                playVideoViewModel.simpleExoPlayer =
-                    SimpleExoPlayer.Builder(requireActivity().applicationContext).build()
-                playerView.player = playVideoViewModel.simpleExoPlayer
-                playVideoViewModel.simpleExoPlayer!!.setSource(
-                    requireActivity().applicationContext,
-                    video.url!!
-                )
-            }
-
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                favViewModel.favVideo.collect { favVideos ->
-                    val isFav = favVideos.any {
-                        it.id == video.id
-                    }
-                    viewModel.isBookMarked.value = isFav
-                }
-            }
-
             viewModel.isBookMarked.observe(viewLifecycleOwner) { bookMarked ->
                 if (bookMarked) {
                     bookmarkImageView.setImageResource(R.drawable.bookmarked)
@@ -122,42 +85,32 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                     bookmarkImageView.setImageResource(R.drawable.bookmark)
                 }
             }
-
-            if (video.text == null) {
+            if (song.text == null) {
                 showDetailsButton.isClickable = false
                 showDetailsTextView.isVisible = false
                 showDetailsButton.isVisible = false
             }
-
             viewModel.showDetails.observe(viewLifecycleOwner) {
                 if (it) {
                     showDetailsButton.setImageResource(R.drawable.hide_details)
                     showDetailsTextView.text = "Hide Details"
-                    descTextView.text = video.text!!
+                    descTextView.text = song.text!!
                 } else {
                     showDetailsButton.setImageResource(R.drawable.show_details)
                     showDetailsTextView.text = "Show Details"
                     descTextView.text =
-                        video.text!!.subSequence(0, min(10, video.text!!.length - 1))
+                        song.text!!.subSequence(0, Integer.min(10, song.text!!.length - 1))
                 }
             }
-
             showDetailsButton.setOnClickListener {
                 viewModel.onShowDetailsClick()
             }
-
-            bookmarkImageView.setOnClickListener {
-                viewModel.onBookMarkClick(video)
-            }
-
-            videoTitleTextView.text = video.title
-            uploaderUsername.text = video.username
-            timeTextView.text = DateFormat.getDateTimeInstance().format(video.time)
-
+            songTitleTextView.text = song.title
             Glide.with(requireContext())
-                .load(video.pfp)
-                .placeholder(R.drawable.click_to_add_image)
+                .load(song.pfp)
                 .into(uploaderPfpImageView)
+            uploaderUsername.text = song.username
+            timeTextView.text = DateFormat.getDateTimeInstance().format(song.time)
 
             addCommentImageButton.setOnClickListener {
                 cropImage.launch(
@@ -176,56 +129,13 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
             commentSendButton.setOnClickListener {
                 hideKeyboard(requireContext())
                 addCommentImageView.isVisible = false
-                viewModel.onCommentSendClick(video)
+                viewModel.onCommentSendClick(song)
                 commentEditText.text.clear()
                 addCommentImageView.isVisible = false
             }
 
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.videoEventFlow.collect { event ->
-                    when (event) {
-                        is VideoViewModel.VideoEvent.UploadVideoSuccess -> {
-                            Snackbar.make(
-                                requireView(),
-                                event.message,
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                        }
-                        is VideoViewModel.VideoEvent.UploadVideoError -> {
-                            Snackbar.make(
-                                requireView(),
-                                event.message,
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
-            }
         }
     }
-
-    /*   override fun onSaveInstanceState(outState: Bundle) {
-           super.onSaveInstanceState(outState)
-           if (playVideoViewModel.simpleExoPlayer != null) {
-               outState.putLong(PLAYER_POSITION, playVideoViewModel.simpleExoPlayer!!.contentPosition)
-           }
-       }*/
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            (requireActivity() as MainActivity).supportActionBar!!.hide()
-        } else {
-            (requireActivity() as MainActivity).supportActionBar!!.show()
-        }
-    }
-
-    /* override fun onViewStateRestored(savedInstanceState: Bundle?) {
-         super.onViewStateRestored(savedInstanceState)
-         savedInstanceState?.let { state ->
-             playVideoViewModel.simpleExoPlayer?.seekTo(state.getLong(PLAYER_POSITION))
-         }
-     }*/
 
     override fun onStart() {
         super.onStart()
@@ -249,7 +159,5 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-        playVideoViewModel.simpleExoPlayer?.release()
-        playVideoViewModel.simpleExoPlayer = null
     }
 }
