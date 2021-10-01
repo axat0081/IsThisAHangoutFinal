@@ -1,26 +1,26 @@
-package com.example.isthisahangout.adapter.favourites
+package com.example.isthisahangout.adapter
 
 import android.annotation.SuppressLint
-import android.icu.text.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.isthisahangout.databinding.SongDisplayLayoutBinding
 import com.example.isthisahangout.models.Song
+import com.example.isthisahangout.utils.newSongQuery
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter
+import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
-class SongAdapter(private val listener: OnItemClickListener) :
-    PagingDataAdapter<Song, SongAdapter.SongViewHolder>(COMPARATOR) {
+class SongRecyclerAdapter(private val listener: OnItemClickListener) :
+    FirestoreRecyclerAdapter<Song, SongRecyclerAdapter.SongViewHolder>(options) {
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<Song>() {
-            override fun areItemsTheSame(oldItem: Song, newItem: Song): Boolean =
-                oldItem.id == newItem.id
-
-            override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean =
-                oldItem == newItem
-        }
+        var options: FirestoreRecyclerOptions<Song> =
+            FirestoreRecyclerOptions.Builder<Song>()
+                .setQuery(
+                    newSongQuery,
+                    Song::class.java
+                )
+                .build()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder =
@@ -32,15 +32,13 @@ class SongAdapter(private val listener: OnItemClickListener) :
             )
         )
 
-    override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SongViewHolder, position: Int, model: Song) {
         val item = getItem(position)
-        if (item != null) {
-            holder.bind(item)
-        }
+        holder.bind(item)
     }
 
     interface OnItemClickListener {
-        fun onItemClick(song: Song)
+        fun onItemClick(post: Song)
     }
 
     inner class SongViewHolder(private val binding: SongDisplayLayoutBinding) :
@@ -51,9 +49,7 @@ class SongAdapter(private val listener: OnItemClickListener) :
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val item = getItem(position)
-                    if (item != null) {
-                        listener.onItemClick(item)
-                    }
+                    listener.onItemClick(item)
                 }
             }
         }
@@ -64,7 +60,8 @@ class SongAdapter(private val listener: OnItemClickListener) :
                 songTiteTextView.text = song.title
                 uploadedByTextView.text = "Uploaded by: ${song.username}"
                 timeTextView.text =
-                    "Uploaded on - " + DateFormat.getDateTimeInstance().format(song.time)
+                    "Uploaded on - " + android.icu.text.DateFormat.getDateTimeInstance()
+                        .format(song.time)
             }
         }
     }

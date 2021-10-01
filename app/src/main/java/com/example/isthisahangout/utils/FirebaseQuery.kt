@@ -53,3 +53,7 @@ val songCollectionReference by lazy {
 val songQuery by lazy {
     songCollectionReference.orderBy("time", Query.Direction.DESCENDING)
 }
+
+val newSongQuery by lazy {
+    songQuery.whereAfterTimestamp()
+}

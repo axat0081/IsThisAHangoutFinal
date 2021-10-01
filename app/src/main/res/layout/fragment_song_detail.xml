@@ -24,6 +24,13 @@
                 android:scaleType="fitXY"
                 tools:src="@mipmap/ic_launcher" />
 
+            <ProgressBar
+                android:id="@+id/thumbnail_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="200dp" />
+
             <RelativeLayout
                 android:id="@+id/layout"
                 android:layout_width="match_parent"

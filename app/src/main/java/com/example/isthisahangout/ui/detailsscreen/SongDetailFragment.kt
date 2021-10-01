@@ -1,6 +1,7 @@
 package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -12,6 +13,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
@@ -24,10 +29,12 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import javax.inject.Inject
 import javax.inject.Named
 
+@AndroidEntryPoint
 class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
     private var _binding: FragmentSongDetailBinding? = null
     private val binding get() = _binding!!
@@ -105,6 +112,31 @@ class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
             showDetailsButton.setOnClickListener {
                 viewModel.onShowDetailsClick()
             }
+
+            Glide.with(requireContext())
+                .load(song.thumbnail)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        thumbnailProgressBar.isVisible = false
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        thumbnailProgressBar.isVisible = false
+                        return false
+                    }
+                }).into(thumbnailImageView)
             songTitleTextView.text = song.title
             Glide.with(requireContext())
                 .load(song.pfp)
