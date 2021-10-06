@@ -28,9 +28,13 @@
         android:id="@+id/animeScheduleFragment"
         android:icon="@drawable/calender"
         android:title="Anime Schedule" />
-   <item
-       android:id="@+id/favouritesFragment"
-       android:icon="@drawable/favourites"
-       android:title="Favourites"/>
+    <item
+        android:id="@+id/animeByNameFragment"
+        android:icon="@drawable/search"
+        android:title="Search Anime By Name" />
+    <item
+        android:id="@+id/favouritesFragment"
+        android:icon="@drawable/favourites"
+        android:title="Favourites" />
 
 </menu>

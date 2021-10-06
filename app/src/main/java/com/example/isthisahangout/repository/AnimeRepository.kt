@@ -14,6 +14,7 @@ import com.example.isthisahangout.remotemediator.UpcomingAnimeRemoteMediator
 import com.example.isthisahangout.room.anime.AnimeDatabase
 import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.utils.networkBoundResource
+import com.example.isthisahangout.utils.normalNetworkBoundResource
 import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 import java.io.IOException
@@ -32,6 +33,7 @@ class AnimeRepository @Inject constructor(
     private val animeGenreDao = db.getAnimeByGenreDao()
     private val animeBySeasonDao = db.getAnimeBySeasonDao()
     private val animeQuoteDoa = db.getAnimeQuoteDao()
+    private val animeByNameDao = db.getAnimeByNameDao()
     fun getUpcomingAnime(): Flow<PagingData<UpcomingAnimeResponse.UpcomingAnime>> =
         Pager(
             config = PagingConfig(
@@ -168,5 +170,21 @@ class AnimeRepository @Inject constructor(
             }
         )
 
+    fun getAnimeByName(
+        query: String
+    ):Flow<Resource<List<AnimeByNameResults.AnimeByName>>> = normalNetworkBoundResource(
+        query = {
+            animeByNameDao.getAnimeByName()
+        },
+        fetch = {
+            api.getAnimebyName(query)
+        },
+        saveFetchResult = { animeList ->
+            db.withTransaction {
+                animeByNameDao.deleteAnimeByName()
+                animeByNameDao.insertAnimeByName(animeList.results)
+            }
+        }
+    )
 
 }

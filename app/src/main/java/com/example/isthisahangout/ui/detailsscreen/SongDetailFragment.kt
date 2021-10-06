@@ -1,7 +1,10 @@
 package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -26,6 +29,11 @@ import com.example.isthisahangout.databinding.FragmentSongDetailBinding
 import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.viewmodel.SongDetailViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.FileDataSourceFactory
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
@@ -33,6 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import javax.inject.Inject
 import javax.inject.Named
+
 
 @AndroidEntryPoint
 class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
@@ -167,6 +176,12 @@ class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
             }
 
         }
+    }
+
+    private fun extractMediaSourceFromUri(uri: Uri): MediaSource {
+        val dataSourceFactory = DefaultHttpDataSource.Factory()
+        return ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(uri))
     }
 
     override fun onStart() {

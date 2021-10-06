@@ -1,9 +1,6 @@
 package com.example.isthisahangout.api
 
-import com.example.isthisahangout.models.AiringAnimeResponse
-import com.example.isthisahangout.models.AnimeGenreResults
-import com.example.isthisahangout.models.AnimeSeasonResults
-import com.example.isthisahangout.models.UpcomingAnimeResponse
+import com.example.isthisahangout.models.*
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -34,5 +31,5 @@ interface AnimeAPI {
     @GET("search/anime")
     suspend fun getAnimebyName(
         @Query("q") name: String
-    ): AnimeGenreResults
+    ): AnimeByNameResults
 }

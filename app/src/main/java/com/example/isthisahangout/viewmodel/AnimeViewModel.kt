@@ -1,9 +1,6 @@
 package com.example.isthisahangout.viewmodel
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.paging.cachedIn
 import com.example.isthisahangout.repository.AnimeRepository
 import com.example.isthisahangout.utils.Resource
@@ -15,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AnimeViewModel @Inject constructor(
-    animeRepository: AnimeRepository
+    animeRepository: AnimeRepository,
+    private val state: SavedStateHandle
 ) : ViewModel() {
     private val genreQuery = MutableLiveData("1")
     private val genreQueryFlow = genreQuery.asFlow()
@@ -32,6 +30,12 @@ class AnimeViewModel @Inject constructor(
     val season = MutableStateFlow("summer")
     var pendingScrollToTopAfterRefresh = false
     var quotePendingScrollToTopAfterRefresh = false
+    private val animeName = MutableStateFlow("dragon ball")
+    var animeNameText = state.get<String>("anime_name")?:""
+        set(value) {
+            field = value
+            state.set("anime_name", animeNameText)
+        }
 
     init {
         queryMap["Action"] = "1"
@@ -87,6 +91,10 @@ class AnimeViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    val animeByName = animeName.flatMapLatest { query ->
+        animeRepository.getAnimeByName(query)
+    }
+
     fun onStart() {
         if (animeBySeason.value !is Resource.Loading) {
             viewModelScope.launch {
@@ -127,6 +135,10 @@ class AnimeViewModel @Inject constructor(
 
     fun searchAnimeBySeason(query: String) {
         season.value = query
+    }
+
+    fun searchAnimeByNameClick() {
+        animeName.value = animeNameText
     }
 
     fun searchAnimeByYear(query: String) {

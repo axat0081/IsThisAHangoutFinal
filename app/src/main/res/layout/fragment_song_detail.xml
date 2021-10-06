@@ -14,28 +14,56 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/thumbnail_image_view"
+            <RelativeLayout
+                android:id="@+id/layout_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/thumbnail_image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginEnd="20dp"
+                    android:scaleType="fitXY"
+                    tools:src="@mipmap/ic_launcher_round" />
+
+                <ProgressBar
+                    android:id="@+id/thumbnail_progress_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/layout_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="20dp"
-                android:scaleType="fitXY"
-                tools:src="@mipmap/ic_launcher" />
+                android:layout_below="@id/layout_main"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp">
 
-            <ProgressBar
-                android:id="@+id/thumbnail_progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="200dp" />
+                <SeekBar
+                    android:id="@+id/seekbar"
+                    android:layout_width="match_parent"
+                    android:foregroundTint="@color/mypink"
+                    android:layout_height="18dp" />
+
+                <ImageView
+                    android:id="@+id/play_image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/seekbar"
+                    android:src="@drawable/music_play" />
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/thumbnail_image_view"
+                android:layout_below="@id/layout_seekbar"
                 android:layout_marginTop="20dp">
 
                 <de.hdodenhof.circleimageview.CircleImageView

@@ -73,6 +73,12 @@
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
+        <action
+            android:id="@+id/action_homeFragment2_to_animeByNameFragment2"
+            app:destination="@id/animeByNameFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right" />
     </fragment>
     <fragment
         android:id="@+id/chatsFragment2"
@@ -273,4 +279,9 @@
             android:name="song"
             app:argType="com.example.isthisahangout.models.Song" />
     </fragment>
+    <fragment
+        android:id="@+id/animeByNameFragment"
+        android:name="com.example.isthisahangout.ui.navDrawer.AnimeByNameFragment"
+        android:label="Search Anime By Name"
+        tools:layout="@layout/fragment_anime_by_name" />
 </navigation>
