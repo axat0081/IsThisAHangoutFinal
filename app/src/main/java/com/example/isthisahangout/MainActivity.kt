@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -55,6 +56,29 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNav.setupWithNavController(navController)
         binding.navView.setupWithNavController(navController)
+        navHostFragment.findNavController()
+            .addOnDestinationChangedListener { controller, destination, arguments ->
+                when (destination.id) {
+                    R.id.homeFragment2 -> {
+                        binding.bottomNav.isVisible = true
+                    }
+                    R.id.chatsFragment2 -> {
+                        binding.bottomNav.isVisible = true
+                    }
+                    R.id.videosFragment2 -> {
+                        binding.bottomNav.isVisible = true
+                    }
+                    R.id.postsFragment2 -> {
+                        binding.bottomNav.isVisible = true
+                    }
+                    R.id.songFragment -> {
+                        binding.bottomNav.isVisible = true
+                    }
+                    else -> {
+                        binding.bottomNav.isVisible = false
+                    }
+                }
+            }
     }
 
     override fun onSupportNavigateUp(): Boolean {
