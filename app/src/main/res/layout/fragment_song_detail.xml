@@ -43,13 +43,34 @@
                 android:layout_below="@id/layout_main"
                 android:layout_marginStart="30dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="30dp">
+                android:layout_marginEnd="30dp"
+                android:gravity="center"
+                android:padding="3dp">
+
+                <TextView
+                    android:id="@+id/song_play_postion_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textColor="@color/myblue"
+                    tools:text="00:00" />
 
                 <SeekBar
                     android:id="@+id/seekbar"
                     android:layout_width="match_parent"
-                    android:foregroundTint="@color/mypink"
-                    android:layout_height="18dp" />
+                    android:layout_height="18dp"
+                    android:layout_toStartOf="@id/song_duration_text_view"
+                    android:layout_toEndOf="@id/song_play_postion_text_view"
+                    android:foregroundTint="@color/mypink" />
+
+                <TextView
+                    android:id="@+id/song_duration_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:padding="3dp"
+                    android:textColor="@color/myblue"
+                    tools:text="05:00" />
 
                 <ImageView
                     android:id="@+id/play_image_view"

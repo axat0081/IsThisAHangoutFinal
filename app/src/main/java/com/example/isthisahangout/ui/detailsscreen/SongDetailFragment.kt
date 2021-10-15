@@ -1,8 +1,7 @@
 package com.example.isthisahangout.ui.detailsscreen
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -30,14 +30,15 @@ import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.viewmodel.SongDetailViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.upstream.FileDataSourceFactory
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import java.text.DateFormat
 import javax.inject.Inject
 import javax.inject.Named
@@ -55,6 +56,9 @@ class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
     private val args by navArgs<SongDetailFragmentArgs>()
     private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
     private val viewModel by viewModels<SongDetailViewModel>()
+    private val songDetailViewModel by viewModels<SongDetailViewModel>()
+
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSongDetailBinding.bind(view)
@@ -121,7 +125,26 @@ class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
             showDetailsButton.setOnClickListener {
                 viewModel.onShowDetailsClick()
             }
-
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                songDetailViewModel.songPlayState.collect { playState ->
+                    if (playState) {
+                        playImageView.setImageResource(R.drawable.pause)
+                    } else {
+                        playImageView.setImageResource(R.drawable.play)
+                    }
+                }
+            }
+            if (songDetailViewModel.simpleExoPlayer == null) {
+                songDetailViewModel.simpleExoPlayer =
+                    SimpleExoPlayer.Builder(requireActivity().applicationContext).build()
+                songDetailViewModel.simpleExoPlayer!!.prepare(
+                    extractMediaSourceFromUri(
+                        Uri.parse(
+                            song.url!!
+                        )
+                    )
+                )
+            }
             Glide.with(requireContext())
                 .load(song.thumbnail)
                 .listener(object : RequestListener<Drawable> {

@@ -9,5 +9,4 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayVideoViewModel @Inject constructor() : ViewModel() {
     var simpleExoPlayer: SimpleExoPlayer? = null
-    val currVideoUrl = MutableLiveData<String>("")
 }

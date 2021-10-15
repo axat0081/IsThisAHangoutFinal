@@ -9,11 +9,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.Comments
-import com.example.isthisahangout.models.FirebaseVideo
 import com.example.isthisahangout.models.Song
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
+import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +24,8 @@ class SongDetailViewModel @Inject constructor(
     private val app: Application,
     private val state: SavedStateHandle
 ) : AndroidViewModel(app) {
-    private val songId = MutableLiveData("any_song_id")
+    var simpleExoPlayer: SimpleExoPlayer? = null
+    var songPlayState = MutableStateFlow(true)
     val showDetails = MutableLiveData(false)
     val isBookMarked = MutableLiveData(false)
     var commentText = state.get<String>("comment_text")

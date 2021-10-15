@@ -87,7 +87,6 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
         }
 
         binding.apply {
-
             commentRecyclerView.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)

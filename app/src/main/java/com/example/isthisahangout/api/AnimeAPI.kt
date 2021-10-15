@@ -32,4 +32,9 @@ interface AnimeAPI {
     suspend fun getAnimebyName(
         @Query("q") name: String
     ): AnimeByNameResults
+
+    @GET("schedule/{day}")
+    suspend fun getAnimeByDay(
+        @Path("day")day: String
+    )
 }
