@@ -36,5 +36,5 @@ interface AnimeAPI {
     @GET("schedule/{day}")
     suspend fun getAnimeByDay(
         @Path("day")day: String
-    )
+    ):AnimeByDayResults
 }

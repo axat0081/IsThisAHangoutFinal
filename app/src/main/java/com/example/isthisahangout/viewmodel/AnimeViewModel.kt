@@ -31,7 +31,8 @@ class AnimeViewModel @Inject constructor(
     var pendingScrollToTopAfterRefresh = false
     var quotePendingScrollToTopAfterRefresh = false
     private val animeName = MutableStateFlow("dragon ball")
-    var animeNameText = state.get<String>("anime_name")?:""
+    private val animeDayQuery = MutableStateFlow("Sunday")
+    var animeNameText = state.get<String>("anime_name") ?: ""
         set(value) {
             field = value
             state.set("anime_name", animeNameText)
@@ -95,6 +96,10 @@ class AnimeViewModel @Inject constructor(
         animeRepository.getAnimeByName(query)
     }
 
+    val animeByDay = animeDayQuery.flatMapLatest { query ->
+        animeRepository.getAnimeByDay(query)
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
     fun onStart() {
         if (animeBySeason.value !is Resource.Loading) {
             viewModelScope.launch {
@@ -143,6 +148,10 @@ class AnimeViewModel @Inject constructor(
 
     fun searchAnimeByYear(query: String) {
         year.value = query
+    }
+
+    fun searchAnimeByDay(query: String) {
+        animeDayQuery.value = query
     }
 
     enum class Refresh {

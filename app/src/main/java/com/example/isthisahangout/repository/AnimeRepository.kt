@@ -34,6 +34,7 @@ class AnimeRepository @Inject constructor(
     private val animeBySeasonDao = db.getAnimeBySeasonDao()
     private val animeQuoteDoa = db.getAnimeQuoteDao()
     private val animeByNameDao = db.getAnimeByNameDao()
+    private val animeByDayDao = db.getAnimeByDayDao()
     fun getUpcomingAnime(): Flow<PagingData<UpcomingAnimeResponse.UpcomingAnime>> =
         Pager(
             config = PagingConfig(
@@ -172,7 +173,7 @@ class AnimeRepository @Inject constructor(
 
     fun getAnimeByName(
         query: String
-    ):Flow<Resource<List<AnimeByNameResults.AnimeByName>>> = normalNetworkBoundResource(
+    ): Flow<Resource<List<AnimeByNameResults.AnimeByName>>> = normalNetworkBoundResource(
         query = {
             animeByNameDao.getAnimeByName()
         },
@@ -187,4 +188,40 @@ class AnimeRepository @Inject constructor(
         }
     )
 
+    fun getAnimeByDay(
+        query: String
+    ) = normalNetworkBoundResource(
+        query = {
+            animeByDayDao.getAnimeByDay(query)
+        },
+        fetch = {
+            api.getAnimeByDay(query)
+        },
+        saveFetchResult = { animeResults ->
+            Log.e("Day",query)
+            val animeList = when (query) {
+                "monday" -> animeResults.monday
+                "tuesday" -> animeResults.tuesday
+                "wednesday" -> animeResults.wednesday
+                "thursday" -> animeResults.thursday
+                "friday" -> animeResults.friday
+                "saturday" -> animeResults.saturday
+                "sunday" -> animeResults.sunday
+                else -> animeResults.sunday
+            }
+            db.withTransaction {
+                animeByDayDao.deleteAnimeByDay(query)
+                animeByDayDao.insertAnimeByDay(animeList.map { anime ->
+                    RoomAnimeByDay(
+                        id = anime.id,
+                        title = anime.title,
+                        imageUrl = anime.imageUrl,
+                        url = anime.url,
+                        synopsis = anime.synopsis,
+                        day = query
+                    )
+                })
+            }
+        }
+    )
 }
