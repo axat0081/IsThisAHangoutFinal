@@ -52,9 +52,18 @@ data class RoomMangaByGenre(
     val genre: String
 ) : Parcelable
 
+@Entity(tableName = "manga_remote_key")
+data class MangaRemoteKey(
+    @PrimaryKey val id: String,
+    val prevKey: Int?,
+    val nextKey: Int?
+)
+
 @Entity(tableName = "manga_by_genre_remote_key")
 data class RoomMangaByGenreRemoteKey(
     @PrimaryKey
-    val genre: String,
-    val nextPageKey: Int
+    val id: String,
+    val prevKey: Int?,
+    val nextKey: Int?,
+    val genre: String
 )

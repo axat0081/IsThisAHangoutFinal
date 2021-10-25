@@ -8,7 +8,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeByGenreAdapter
+import com.example.isthisahangout.adapter.MangaAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeByGenreBinding
+import com.example.isthisahangout.models.MangaResults
 import com.example.isthisahangout.models.RoomAnimeByGenres
 import com.example.isthisahangout.viewmodel.AnimeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +31,7 @@ class AnimeByGenreFragment : Fragment(R.layout.fragment_anime_by_genre),
             animeByGenreRecyclerView.apply {
                 adapter = animeAdapter
                 layoutManager =
-                    LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             }
             viewLifecycleOwner.lifecycleScope.launch {
                 animeViewModel.animeByGenre.collect {
@@ -84,8 +86,12 @@ class AnimeByGenreFragment : Fragment(R.layout.fragment_anime_by_genre),
 
         }
     }
-
     override fun onItemClick(animeResults: RoomAnimeByGenres) {
-        TODO("Not yet implemented")
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }

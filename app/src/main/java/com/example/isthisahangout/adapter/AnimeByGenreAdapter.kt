@@ -12,7 +12,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.example.isthisahangout.databinding.AnimeDisplayLayoutBigBinding
+import com.example.isthisahangout.databinding.AnimeDisplayLayoutBinding
 import com.example.isthisahangout.models.RoomAnimeByGenres
 
 class AnimeByGenreAdapter(private val listener: OnItemClickListener) :
@@ -39,7 +39,7 @@ class AnimeByGenreAdapter(private val listener: OnItemClickListener) :
         viewType: Int
     ): AnimeByGenreViewHolder {
         return AnimeByGenreViewHolder(
-            AnimeDisplayLayoutBigBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            AnimeDisplayLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
@@ -53,7 +53,7 @@ class AnimeByGenreAdapter(private val listener: OnItemClickListener) :
         fun onItemClick(animeResults: RoomAnimeByGenres)
     }
 
-    inner class AnimeByGenreViewHolder(val binding: AnimeDisplayLayoutBigBinding) :
+    inner class AnimeByGenreViewHolder(val binding: AnimeDisplayLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
@@ -79,7 +79,7 @@ class AnimeByGenreAdapter(private val listener: OnItemClickListener) :
                             target: Target<Drawable>?,
                             isFirstResource: Boolean
                         ): Boolean {
-                            animeProgressBarBig.isVisible = false
+                            animeProgressBar.isVisible = false
                             return false
                         }
 
@@ -90,10 +90,10 @@ class AnimeByGenreAdapter(private val listener: OnItemClickListener) :
                             dataSource: DataSource?,
                             isFirstResource: Boolean
                         ): Boolean {
-                            animeProgressBarBig.isVisible = false
+                            animeProgressBar.isVisible = false
                             return false
                         }
-                    }).into(animeImageViewBig)
+                    }).into(animeImageView)
                 animeTitleTextView.text = animeResults.title
             }
         }

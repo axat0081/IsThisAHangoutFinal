@@ -61,16 +61,13 @@ class AnimeByGenreRemoteMediator(
                         genre = query
                     )
                 }
-                Log.e("Anime", keysList.size.toString())
                 keyDao.insertAll(keysList)
                 animeDao.insertAll(animeList)
                 MediatorResult.Success(endOfPaginationReached = isEndOfList)
             }
         } catch (exception: IOException) {
-            Log.e("Anime", exception.message.toString())
             MediatorResult.Error(exception)
         } catch (exception: HttpException) {
-            Log.e("Anime", exception.message.toString())
             MediatorResult.Error(exception)
         }
     }

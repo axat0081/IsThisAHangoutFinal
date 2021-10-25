@@ -79,6 +79,13 @@
             app:enterAnim="@anim/from_left"
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right" />
+        <action
+            android:id="@+id/action_homeFragment2_to_mangaFragment"
+            app:destination="@id/mangaFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
     <fragment
         android:id="@+id/chatsFragment2"
@@ -284,4 +291,9 @@
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeByNameFragment"
         android:label="Search Anime By Name"
         tools:layout="@layout/fragment_anime_by_name" />
+    <fragment
+        android:id="@+id/mangaFragment"
+        android:name="com.example.isthisahangout.ui.navDrawer.MangaFragment"
+        android:label="Manga Corner"
+        tools:layout="@layout/fragment_manga" />
 </navigation>

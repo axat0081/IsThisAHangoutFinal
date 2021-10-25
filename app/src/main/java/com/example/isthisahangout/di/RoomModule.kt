@@ -8,6 +8,9 @@ import com.example.isthisahangout.room.favourites.FavouritesDatabase
 import com.example.isthisahangout.room.games.GameDatabase
 import com.example.isthisahangout.room.games.GamesDao
 import com.example.isthisahangout.room.games.GamesRemoteKeyDao
+import com.example.isthisahangout.room.manga.MangaDao
+import com.example.isthisahangout.room.manga.MangaDatabase
+import com.example.isthisahangout.room.manga.MangaRemoteKeyDao
 import com.example.isthisahangout.room.posts.PostDatabase
 import com.example.isthisahangout.room.posts.PostsDao
 import dagger.Module
@@ -93,6 +96,23 @@ object RoomModule {
     @Provides
     @Singleton
     fun providesGamingRemoteKeyDao(db: GameDatabase): GamesRemoteKeyDao = db.getGamesRemoteKeyDao()
+
+    ////Manga
+    @Provides
+    @Singleton
+    fun providesMangaDatabase(app: Application): MangaDatabase =
+        Room.databaseBuilder(app, MangaDatabase::class.java, "manga_database")
+            .fallbackToDestructiveMigration()
+            .build()
+
+    @Provides
+    @Singleton
+    fun providesMangaDao(db: MangaDatabase): MangaDao = db.getMangaDao()
+
+    @Provides
+    @Singleton
+    fun providesMangaRemoteKeyDao(db: MangaDatabase): MangaRemoteKeyDao = db.getMangaRemoteKeyDao()
+
 
     ///Posts
     @Provides

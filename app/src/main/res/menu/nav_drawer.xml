@@ -29,6 +29,10 @@
         android:icon="@drawable/calender"
         android:title="Anime Schedule" />
     <item
+        android:id="@+id/mangaFragment"
+        android:icon="@drawable/manga_corner"
+        android:title="Manga Corner" />
+    <item
         android:id="@+id/animeByNameFragment"
         android:icon="@drawable/search"
         android:title="Search Anime By Name" />

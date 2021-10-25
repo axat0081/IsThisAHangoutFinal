@@ -1,26 +1,26 @@
 package com.example.isthisahangout.remotemediator
 
+import android.util.Log
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.example.isthisahangout.api.AnimeAPI
-import com.example.isthisahangout.models.RoomMangaByGenre
-import com.example.isthisahangout.models.RoomMangaByGenreRemoteKey
+import com.example.isthisahangout.models.MangaRemoteKey
+import com.example.isthisahangout.models.MangaResults
 import com.example.isthisahangout.room.manga.MangaDatabase
 import retrofit2.HttpException
 import java.io.IOException
 
-class MangaByGenreRemoteMediator(
-    private val genre: String,
-    private val animeAPI: AnimeAPI,
-    private val mangaDb: MangaDatabase
-) : RemoteMediator<Int, RoomMangaByGenre>() {
-    private val mangaDao = mangaDb.getMangaDao()
-    private val mangaRemoteKeyDao = mangaDb.getMangaRemoteKeyDao()
+class MangaRemoteMediator(
+    private val api: AnimeAPI,
+    private val db: MangaDatabase
+) : RemoteMediator<Int, MangaResults.Manga>() {
+    private val keyDao = db.getMangaRemoteKeyDao()
+    private val mangaDao = db.getMangaDao()
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, RoomMangaByGenre>
+        state: PagingState<Int, MangaResults.Manga>
     ): MediatorResult {
         val page = when (val pageKeyData = getKeyPageData(loadType, state)) {
             is MediatorResult.Success -> {
@@ -31,48 +31,39 @@ class MangaByGenreRemoteMediator(
             }
         }
         return try {
-            val response = animeAPI.getMangaByGenre(page = page, genre = genre)
-            val resultList = response.results
-            val isEndOfList = resultList.isEmpty()
-            mangaDb.withTransaction {
+            val response = api.getManga(page.toString())
+            val mangaList = response.top
+            val isEndOfList = mangaList.isEmpty()
+            db.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    mangaRemoteKeyDao.deleteMangaByGenreRemoteKey(genre)
-                    mangaDao.deleteMangaByGenre(genre)
+                    keyDao.deleteMangaRemoteKey()
+                    mangaDao.deleteManga()
                 }
                 val prevKey = if (page == 1) null else page - 1
                 val nextKey = if (isEndOfList) null else page + 1
-                val mangaList = resultList.map {
-                    RoomMangaByGenre(
-                        id = it.id,
-                        imageUrl = it.imageUrl,
-                        url = it.url,
-                        synopsis = it.synopsis,
-                        genre = genre,
-                        title = it.title
-                    )
-                }
                 val keysList = mangaList.map {
-                    RoomMangaByGenreRemoteKey(
+                    MangaRemoteKey(
                         id = it.id,
                         prevKey = prevKey,
-                        nextKey = nextKey,
-                        genre = genre
+                        nextKey = nextKey
                     )
                 }
-                mangaRemoteKeyDao.insertMangaByGenreRemoteKey(keysList)
-                mangaDao.insertRoomMangaByGenre(mangaList)
+                keyDao.insertMangaRemoteKey(keysList)
+                mangaDao.insertManga(mangaList)
                 MediatorResult.Success(endOfPaginationReached = isEndOfList)
             }
         } catch (exception: IOException) {
+            Log.e("Error", exception.message.toString())
             MediatorResult.Error(exception)
         } catch (exception: HttpException) {
+            Log.e("Error", exception.message.toString())
             MediatorResult.Error(exception)
         }
     }
 
     private suspend fun getKeyPageData(
         loadType: LoadType,
-        state: PagingState<Int, RoomMangaByGenre>
+        state: PagingState<Int, MangaResults.Manga>
     ): Any? {
         return when (loadType) {
             LoadType.REFRESH -> {
@@ -85,38 +76,36 @@ class MangaByGenreRemoteMediator(
                 remoteKeys.nextKey
             }
             LoadType.PREPEND -> {
-                val remoteKeys = getFirstRemoteKey(state)
-                    ?: return 1 /*throw InvalidObjectException("Invalid state, key should not be null")*/
+                val remoteKeys = getFirstRemoteKey(state) ?: return 1
+                /*?: throw InvalidObjectException("Invalid state, key should not be null")*/
                 remoteKeys.prevKey ?: return MediatorResult.Success(endOfPaginationReached = true)
                 remoteKeys.prevKey
             }
         }
     }
 
-    private suspend fun getLastRemoteKey(state: PagingState<Int, RoomMangaByGenre>): RoomMangaByGenreRemoteKey? {
+    private suspend fun getLastRemoteKey(state: PagingState<Int, MangaResults.Manga>): MangaRemoteKey? {
         return state.pages
             .lastOrNull { it.data.isNotEmpty() }
             ?.data?.lastOrNull()
             ?.let {
-                mangaRemoteKeyDao.getMangaByGenreRemoteKey(it.id, genre)
+                keyDao.getMangaRemoteKey(it.id)
             }
     }
 
-    private suspend fun getFirstRemoteKey(state: PagingState<Int, RoomMangaByGenre>): RoomMangaByGenreRemoteKey? {
+    private suspend fun getFirstRemoteKey(state: PagingState<Int, MangaResults.Manga>): MangaRemoteKey? {
         return state.pages
-            .firstOrNull {
-                it.data.isNotEmpty()
-            }
+            .firstOrNull() { it.data.isNotEmpty() }
             ?.data?.firstOrNull()
             ?.let {
-                mangaRemoteKeyDao.getMangaByGenreRemoteKey(it.id, genre)
+                keyDao.getMangaRemoteKey(it.id)
             }
     }
 
-    private suspend fun getClosestRemoteKey(state: PagingState<Int, RoomMangaByGenre>): RoomMangaByGenreRemoteKey? {
+    private suspend fun getClosestRemoteKey(state: PagingState<Int, MangaResults.Manga>): MangaRemoteKey? {
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.let {
-                mangaRemoteKeyDao.getMangaByGenreRemoteKey(it.id, genre)
+            state.closestItemToPosition(position)?.id?.let { id ->
+                keyDao.getMangaRemoteKey(id)
             }
         }
     }
