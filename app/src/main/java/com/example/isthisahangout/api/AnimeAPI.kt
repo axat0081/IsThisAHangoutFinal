@@ -35,6 +35,17 @@ interface AnimeAPI {
 
     @GET("schedule/{day}")
     suspend fun getAnimeByDay(
-        @Path("day")day: String
-    ):AnimeByDayResults
+        @Path("day") day: String
+    ): AnimeByDayResults
+
+    @GET("top/manga/{id}")
+    suspend fun getManga(
+        @Path("id") page: String
+    ): MangaResults
+
+    @GET("search/manga")
+    suspend fun getMangaByGenre(
+        @Query("page") page: Int,
+        @Query("genre") genre: String
+    ): MangaGenreResults
 }
