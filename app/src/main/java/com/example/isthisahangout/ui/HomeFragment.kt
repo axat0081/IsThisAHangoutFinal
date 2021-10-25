@@ -15,6 +15,7 @@ import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AiringAnimeAdapter
 import com.example.isthisahangout.adapter.GamesAdapter
+import com.example.isthisahangout.adapter.GeneralLoadStateAdapter
 import com.example.isthisahangout.adapter.UpcomingAnimeAdapter
 import com.example.isthisahangout.databinding.FragmentHomeBinding
 import com.example.isthisahangout.models.AiringAnimeResponse
@@ -55,19 +56,28 @@ class HomeFragment : Fragment(R.layout.fragment_home), UpcomingAnimeAdapter.OnIt
             upcomingAnimeRecyclerView.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                adapter = upcomingAnimeAdapter
+                adapter = upcomingAnimeAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { upcomingAnimeAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { upcomingAnimeAdapter.retry() }
+                )
                 itemAnimator = null
             }
             airingAnimeRecyclerview.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                adapter = airingAnimeAdapter
+                adapter = airingAnimeAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { airingAnimeAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { airingAnimeAdapter.retry() }
+                )
                 itemAnimator = null
             }
             videoGamesRecyclerview.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                adapter = gamesAdapter
+                adapter = gamesAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { gamesAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { gamesAdapter.retry() }
+                )
                 itemAnimator = null
             }
             viewLifecycleOwner.lifecycleScope.launch {

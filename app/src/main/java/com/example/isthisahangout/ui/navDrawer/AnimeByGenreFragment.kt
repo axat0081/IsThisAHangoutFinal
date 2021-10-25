@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeByGenreAdapter
+import com.example.isthisahangout.adapter.GeneralLoadStateAdapter
 import com.example.isthisahangout.adapter.MangaAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeByGenreBinding
 import com.example.isthisahangout.models.MangaResults
@@ -29,7 +30,10 @@ class AnimeByGenreFragment : Fragment(R.layout.fragment_anime_by_genre),
         val animeAdapter = AnimeByGenreAdapter(this)
         binding.apply {
             animeByGenreRecyclerView.apply {
-                adapter = animeAdapter
+                adapter = animeAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { animeAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { animeAdapter.retry() }
+                )
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             }

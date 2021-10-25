@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
+import com.example.isthisahangout.adapter.GeneralLoadStateAdapter
 import com.example.isthisahangout.adapter.MangaAdapter
 import com.example.isthisahangout.adapter.MangaByGenreAdapter
 import com.example.isthisahangout.databinding.FragmentMangaBinding
@@ -34,13 +35,19 @@ class MangaFragment : Fragment(R.layout.fragment_manga), MangaByGenreAdapter.OnI
             mangaRecyclerView.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                adapter = mangaAdapter
+                adapter = mangaAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { mangaAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { mangaAdapter.retry() }
+                )
             }
 
             mangaByGenreRecyclerView.apply {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                adapter = mangaByGenreAdapter
+                adapter = mangaByGenreAdapter.withLoadStateHeaderAndFooter(
+                    header = GeneralLoadStateAdapter { mangaByGenreAdapter.retry() },
+                    footer = GeneralLoadStateAdapter { mangaByGenreAdapter.retry() }
+                )
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
