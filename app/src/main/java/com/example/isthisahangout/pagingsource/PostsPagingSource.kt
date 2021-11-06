@@ -7,8 +7,7 @@ import com.example.isthisahangout.utils.postsQuery
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.tasks.await
 
-class PostsPagingSource(
-) :
+class PostsPagingSource :
     PagingSource<QuerySnapshot, FirebasePost>() {
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, FirebasePost> {

@@ -44,6 +44,7 @@ data class RoomGames(
     val screenshots: ArrayList<String?>
 ):Parcelable
 
+
 @Entity(tableName = "games_remote_key")
 data class GameRemoteKey(
     @PrimaryKey val id: String,
