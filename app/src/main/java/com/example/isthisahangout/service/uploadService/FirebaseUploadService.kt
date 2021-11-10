@@ -7,10 +7,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.isthisahangout.MainActivity
-import com.example.isthisahangout.models.Comments
-import com.example.isthisahangout.models.FirebasePost
-import com.example.isthisahangout.models.FirebaseVideo
-import com.example.isthisahangout.models.Song
+import com.example.isthisahangout.models.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.firestore.CollectionReference
@@ -29,6 +26,10 @@ class FirebaseUploadService : BaseService() {
     @Inject
     @Named("UserRef")
     lateinit var userRef: DatabaseReference
+
+    @Inject
+    @Named("ComfortCharactersRef")
+    lateinit var comfortCharacterRef: DatabaseReference
 
     @Inject
     @Named("PfpRef")
@@ -53,6 +54,10 @@ class FirebaseUploadService : BaseService() {
     @Inject
     @Named("CommentsUrlRef")
     lateinit var commentsUrlRef: StorageReference
+
+    @Inject
+    @Named("ComfortCharacterRef")
+    lateinit var comfortCharacterUrlRef: StorageReference
 
     @Inject
     @Named("PostsRef")
@@ -85,6 +90,7 @@ class FirebaseUploadService : BaseService() {
         const val FIREBASE_SONG = "firebase_song_upload"
         const val FIREBASE_VIDEO = "firebase_video_upload"
         const val FIREBASE_COMMENT = "firebase_comment_upload"
+        const val FIREBASE_COMFORT_CHARACTER = "firebase_comfort_character"
 
         const val SUCCESS = "Uploaded to database"
         const val FAILURE = "Aw snap , an error occurred"
@@ -93,6 +99,7 @@ class FirebaseUploadService : BaseService() {
         const val UPLOAD_SONG_CAPTION = "Uploading song....."
         const val UPLOAD_VIDEO_CAPTION = "Uploading video....."
         const val UPLOAD_COMMENT_CAPTION = "Posting Comment...."
+        const val UPLOAD_COMFORT_CHARACTER_CAPTION = "Uploading your comfort character"
 
         const val defaultImage =
             "https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75"
@@ -133,15 +140,23 @@ class FirebaseUploadService : BaseService() {
                     uploadVideo(video)
                 }
 
-                "comment" ->{
+                "comment" -> {
                     val comment = intent.getParcelableExtra<Comments>(FIREBASE_COMMENT)!!
                     uploadComment(comment)
+                }
+
+                "comfortCharacter" -> {
+                    val character = intent.getParcelableExtra<ComfortCharacter>(
+                        FIREBASE_COMFORT_CHARACTER
+                    )!!
+                    uploadComfortCharacter(character)
                 }
             }
         }
 
         return START_REDELIVER_INTENT
     }
+
 
     private fun uploadPfpFromUri(fileUri: Uri) {
         Log.e("FirebaseAuthViewModel4", fileUri.toString())
@@ -203,12 +218,12 @@ class FirebaseUploadService : BaseService() {
         }
     }
 
-    private fun uploadComment(comments: Comments){
+    private fun uploadComment(comments: Comments) {
         taskStarted()
         showProgressNotification(UPLOAD_COMMENT_CAPTION, 0, 0, true)
-        if(comments.image !=null){
+        if (comments.image != null) {
             val image = Uri.parse(comments.image)
-            image.lastPathSegment?.let{
+            image.lastPathSegment?.let {
                 commentsUrlRef.child(it).putFile(image)
                     .addOnProgressListener { (bytesTransferred, totalByteCount) ->
                         showProgressNotification(
@@ -217,13 +232,14 @@ class FirebaseUploadService : BaseService() {
                             totalByteCount,
                             true
                         )
-                    }.continueWithTask { task->
+                    }.continueWithTask { task ->
                         if (!task.isSuccessful) {
                             throw task.exception!!
                         }
                         commentsUrlRef.child(it).downloadUrl
-                    }.addOnSuccessListener { downloadUri->
-                        val commentsRef = commentsCollectionRef.document(comments.contentId!!).collection("comments")
+                    }.addOnSuccessListener { downloadUri ->
+                        val commentsRef = commentsCollectionRef.document(comments.contentId!!)
+                            .collection("comments")
                         val id = commentsRef.document().id
                         commentsRef.document(id).set(
                             Comments(
@@ -259,7 +275,8 @@ class FirebaseUploadService : BaseService() {
                     }
             }
         } else {
-            val commentsRef = commentsCollectionRef.document(comments.contentId!!).collection("comments")
+            val commentsRef =
+                commentsCollectionRef.document(comments.contentId!!).collection("comments")
             val id = commentsRef.document().id
             commentsRef.document(id).set(
                 Comments(
@@ -537,6 +554,57 @@ class FirebaseUploadService : BaseService() {
                                     }
                                 }
                             }
+                    }
+                }
+        }
+    }
+
+    private fun uploadComfortCharacter(character: ComfortCharacter) {
+        taskStarted()
+        showProgressNotification(UPLOAD_COMFORT_CHARACTER_CAPTION, 0, 0, true)
+        val imageUrl: Uri = Uri.parse(character.image)
+        imageUrl.lastPathSegment?.let {
+            comfortCharacterUrlRef.child(it).putFile(imageUrl)
+                .addOnProgressListener { (bytesTransferred, totalByteCount) ->
+                    showProgressNotification(
+                        UPLOAD_COMFORT_CHARACTER_CAPTION,
+                        bytesTransferred,
+                        totalByteCount,
+                        true
+                    )
+                }.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        throw task.exception!!
+                    }
+                    comfortCharacterUrlRef.child(it).downloadUrl
+                }.addOnFailureListener { comfortCharacterUploadException ->
+                    Log.w(TAG, "uploadFromUri:onFailure", comfortCharacterUploadException)
+                    // [START_EXCLUDE]
+                    broadcastUploadFinished(null, Uri.parse(character.image))
+                    showUploadFinishedNotification(null, Uri.parse(character.image))
+                    taskCompleted()
+                }.addOnSuccessListener { imageUri ->
+                    comfortCharacterRef.child(MainActivity.userId!!).setValue(
+                        ComfortCharacter(
+                            name = character.name,
+                            desc = character.desc,
+                            from = character.from,
+                            image = imageUri.toString()
+                        )
+                    ).addOnCompleteListener { comfortCharaterUpload->
+                        if (comfortCharaterUpload.isSuccessful) {
+                            Log.d(TAG, "uploadFromUri: getDownloadUri success")
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(imageUri, imageUri)
+                            showUploadFinishedNotification(imageUri, imageUri)
+                            taskCompleted()
+                        } else {
+                            Log.w(TAG, "uploadFromUri:onFailure", comfortCharaterUpload.exception)
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(null, imageUri)
+                            showUploadFinishedNotification(null, imageUri)
+                            taskCompleted()
+                        }
                     }
                 }
         }

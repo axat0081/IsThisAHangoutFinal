@@ -96,7 +96,6 @@ class FirebaseAuthViewModel @Inject constructor(
                     .addValueEventListener(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             loginEmail = snapshot.value.toString()
-                            Log.e("Login", loginEmail)
                             mAuth.signInWithEmailAndPassword(loginEmail, loginPassword)
                                 .addOnCompleteListener { login ->
                                     if (login.isSuccessful) {
@@ -104,10 +103,16 @@ class FirebaseAuthViewModel @Inject constructor(
                                             .addValueEventListener(object : ValueEventListener {
                                                 override fun onDataChange(snapshot: DataSnapshot) {
                                                     MainActivity.userId = mAuth.currentUser!!.uid
+                                                    MainActivity.userIdObv.value =
+                                                        MainActivity.userId ?: ""
                                                     MainActivity.username =
                                                         snapshot.child("userName").value.toString()
+                                                    MainActivity.userNameObv.value =
+                                                        MainActivity.username ?: ""
                                                     MainActivity.userpfp =
                                                         snapshot.child("pfp").value.toString()
+                                                    MainActivity.userPfpObv.value =
+                                                        MainActivity.userpfp ?: ""
                                                     viewModelScope.launch {
                                                         authChannel.send(
                                                             AuthEvent.LoginSuccess(
@@ -152,10 +157,16 @@ class FirebaseAuthViewModel @Inject constructor(
                         .addValueEventListener(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 MainActivity.userId = mAuth.currentUser!!.uid
+                                MainActivity.userIdObv.value =
+                                    MainActivity.userId ?: ""
                                 MainActivity.username =
                                     snapshot.child("userName").value.toString()
+                                MainActivity.userNameObv.value =
+                                    MainActivity.username ?: ""
                                 MainActivity.userpfp =
                                     snapshot.child("pfp").value.toString()
+                                MainActivity.userPfpObv.value =
+                                    MainActivity.userpfp ?: ""
                                 viewModelScope.launch {
                                     authChannel.send(
                                         AuthEvent.LoginSuccess(
@@ -216,7 +227,6 @@ class FirebaseAuthViewModel @Inject constructor(
 
 
     fun onUpdateClick() {
-        Log.e("FirebaseAuthViewModel", profilePfp.toString())
         viewModelScope.launch {
             app.startService(
                 Intent(app, FirebaseUploadService::class.java)

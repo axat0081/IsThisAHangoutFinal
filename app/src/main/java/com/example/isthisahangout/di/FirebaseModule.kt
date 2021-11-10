@@ -30,6 +30,12 @@ object FirebaseModule {
 
     @Provides
     @Singleton
+    @Named("ComfortCharactersRef")
+    fun providesComfortCharacterRef(): DatabaseReference =
+        FirebaseDatabase.getInstance().reference.child("comfortCharacters")
+
+    @Provides
+    @Singleton
     @Named("PfpRef")
     fun providesPfpStorageRef(): StorageReference =
         FirebaseStorage.getInstance().getReference("pfp")
@@ -63,6 +69,12 @@ object FirebaseModule {
     @Named("CommentsUrlRef")
     fun providesCommentsStorageRef(): StorageReference =
         FirebaseStorage.getInstance().getReference("Comments")
+
+    @Provides
+    @Singleton
+    @Named("ComfortCharacterRef")
+    fun providesComfortCharacterRef(): StorageReference =
+        FirebaseStorage.getInstance().getReference("ComfortCharacters")
 
 
     @Provides

@@ -15,6 +15,7 @@ import com.example.isthisahangout.databinding.ActivityMainBinding
 import com.example.isthisahangout.utils.ConnectionLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -28,6 +29,9 @@ class MainActivity : AppCompatActivity() {
         var username: String? = null
         var userId: String? = null
         var userpfp: String? = null
+        val userNameObv = MutableStateFlow("abc")
+        val userPfpObv = MutableStateFlow("abc.com")
+        val userIdObv = MutableStateFlow("abc1")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
