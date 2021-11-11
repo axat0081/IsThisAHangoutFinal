@@ -56,7 +56,7 @@ class FirebaseUploadService : BaseService() {
     lateinit var commentsUrlRef: StorageReference
 
     @Inject
-    @Named("ComfortCharacterRef")
+    @Named("ComfortCharacterUrlRef")
     lateinit var comfortCharacterUrlRef: StorageReference
 
     @Inject
@@ -584,7 +584,7 @@ class FirebaseUploadService : BaseService() {
                     showUploadFinishedNotification(null, Uri.parse(character.image))
                     taskCompleted()
                 }.addOnSuccessListener { imageUri ->
-                    comfortCharacterRef.child(MainActivity.userId!!).setValue(
+                    comfortCharacterRef.child(mAuth.currentUser!!.uid).setValue(
                         ComfortCharacter(
                             name = character.name,
                             desc = character.desc,

@@ -6,42 +6,81 @@
     android:background="@drawable/bgdetails"
     tools:context=".ui.navDrawer.ProfileFragment">
 
-    <ProgressBar
-        android:id="@+id/pfp_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="90dp"
-        android:visibility="gone" />
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/pfp_image_view"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/click_to_add_image" />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/username_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/pfp_image_view"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="30dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="@color/mypink"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        tools:text="Username" />
+            <ProgressBar
+                android:id="@+id/pfp_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="90dp"
+                android:visibility="gone" />
 
-    <Button
-        android:id="@+id/update_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/username_text_view"
-        android:layout_marginStart="90dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="90dp"
-        android:background="@drawable/rounded_button"
-        android:text="Update" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/pfp_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="30dp"
+                android:src="@drawable/click_to_add_image" />
+
+            <TextView
+                android:id="@+id/username_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pfp_image_view"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/mypink"
+
+                tools:text="Username" />
+
+            <Button
+                android:id="@+id/update_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/username_text_view"
+                android:layout_marginStart="90dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="90dp"
+                android:background="@drawable/rounded_button"
+                android:text="Update" />
+
+            <TextView
+                android:id="@+id/comfort_character_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/update_button"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="30dp"
+                android:text="Comfort Character"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/mypink"
+                android:textSize="25sp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/add_comfort_character_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/update_button"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp"
+                android:src="@drawable/add" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/comfort_character_text_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/add_comfort_character_button"
+                android:layout_marginTop="10dp" />
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

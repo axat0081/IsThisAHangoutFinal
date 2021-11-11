@@ -87,7 +87,7 @@ class UserViewModel @Inject constructor(
             viewModelScope.launch {
                 app.startService(
                     Intent(app, FirebaseUploadService::class.java)
-                        .putExtra(FirebaseUploadService.EXTRA_FILE_URI, character)
+                        .putExtra(FirebaseUploadService.FIREBASE_COMFORT_CHARACTER, character)
                         .putExtra("path", "comfortCharacter")
                         .setAction(FirebaseUploadService.ACTION_UPLOAD).apply {
                         }

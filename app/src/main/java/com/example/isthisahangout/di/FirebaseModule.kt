@@ -72,8 +72,8 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    @Named("ComfortCharacterRef")
-    fun providesComfortCharacterRef(): StorageReference =
+    @Named("ComfortCharacterUrlRef")
+    fun providesComfortCharacterStorageRef(): StorageReference =
         FirebaseStorage.getInstance().getReference("ComfortCharacters")
 
 

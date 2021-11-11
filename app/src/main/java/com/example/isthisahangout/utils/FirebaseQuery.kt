@@ -1,6 +1,9 @@
 package com.example.isthisahangout.utils
 
+import android.util.Log
+import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.adapter.whereAfterTimestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -57,4 +60,10 @@ val songQuery by lazy {
 
 val newSongQuery by lazy {
     songQuery.whereAfterTimestamp()
+}
+
+val comfortCharacterQuery by lazy {
+    Log.e("ID",MainActivity.userId!!)
+    FirebaseDatabase.getInstance().reference
+        .child("comfortCharacters").child(FirebaseAuth.getInstance().currentUser!!.uid)
 }

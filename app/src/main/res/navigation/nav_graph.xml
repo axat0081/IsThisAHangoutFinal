@@ -200,7 +200,15 @@
         android:id="@+id/profileFragment2"
         android:name="com.example.isthisahangout.ui.navDrawer.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment2_to_addComfortCharacterFragment"
+            app:destination="@id/addComfortCharacterFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/postsDetailsFragment"
         android:name="com.example.isthisahangout.ui.detailsscreen.PostsDetailsFragment"
@@ -296,4 +304,9 @@
         android:name="com.example.isthisahangout.ui.navDrawer.MangaFragment"
         android:label="Manga Corner"
         tools:layout="@layout/fragment_manga" />
+    <dialog
+        android:id="@+id/addComfortCharacterFragment"
+        android:name="com.example.isthisahangout.ui.navDrawer.AddComfortCharacterFragment"
+        android:label="fragment_add_comfort_character"
+        tools:layout="@layout/fragment_add_comfort_character" />
 </navigation>
