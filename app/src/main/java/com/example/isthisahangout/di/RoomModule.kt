@@ -88,6 +88,10 @@ object RoomModule {
     @Singleton
     fun providesAnimeByDayDao(db: AnimeDatabase): AnimeByDayDao = db.getAnimeByDayDao()
 
+    @Provides
+    @Singleton
+    fun providesAnimePicsDao(db: AnimeDatabase): AnimePicsDao = db.getAnimePicsDao()
+
     ////Games
     @Provides
     @Singleton

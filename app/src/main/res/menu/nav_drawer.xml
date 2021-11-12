@@ -40,5 +40,7 @@
         android:id="@+id/favouritesFragment"
         android:icon="@drawable/favourites"
         android:title="Favourites" />
-
+    <item
+        android:id="@+id/animePicsFragment"
+        android:title="Anime pics"/>
 </menu>

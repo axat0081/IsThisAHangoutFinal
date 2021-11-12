@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.room.withTransaction
 import com.example.isthisahangout.api.AnimeAPI
+import com.example.isthisahangout.api.AnimePicsAPI
 import com.example.isthisahangout.api.AnimeQuoteAPI
 import com.example.isthisahangout.models.*
 import com.example.isthisahangout.remotemediator.AiringAnimeRemoteMediator
@@ -16,6 +17,7 @@ import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.utils.networkBoundResource
 import com.example.isthisahangout.utils.normalNetworkBoundResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -26,7 +28,8 @@ import javax.inject.Singleton
 class AnimeRepository @Inject constructor(
     val api: AnimeAPI,
     val db: AnimeDatabase,
-    private val quoteAPI: AnimeQuoteAPI
+    private val quoteAPI: AnimeQuoteAPI,
+    private val animePicsAPI: AnimePicsAPI
 ) {
     private val upcomingAnimeDao = db.getUpcomingAnimeDao()
     private val airingAnimeDao = db.getAiringAnimeDoa()
@@ -35,6 +38,8 @@ class AnimeRepository @Inject constructor(
     private val animeQuoteDoa = db.getAnimeQuoteDao()
     private val animeByNameDao = db.getAnimeByNameDao()
     private val animeByDayDao = db.getAnimeByDayDao()
+    private val animePicsDao = db.getAnimePicsDao()
+
     fun getUpcomingAnime(): Flow<PagingData<UpcomingAnimeResponse.UpcomingAnime>> =
         Pager(
             config = PagingConfig(
@@ -198,7 +203,7 @@ class AnimeRepository @Inject constructor(
             api.getAnimeByDay(query)
         },
         saveFetchResult = { animeResults ->
-            Log.e("Day",query)
+            Log.e("Day", query)
             val animeList = when (query) {
                 "monday" -> animeResults.monday
                 "tuesday" -> animeResults.tuesday
@@ -224,4 +229,14 @@ class AnimeRepository @Inject constructor(
             }
         }
     )
+
+    fun getAnimePics(): Flow<List<AnimeImage>> = flow {
+        while (true) {
+            val animeImages = animePicsAPI.getAnimePics(FieldHolder()).images.map { imageUrl ->
+                AnimeImage(imageUrl)
+            }
+            emit(animeImages)
+            kotlinx.coroutines.delay(60000)
+        }
+    }
 }

@@ -100,6 +100,8 @@ class AnimeViewModel @Inject constructor(
         animeRepository.getAnimeByDay(query)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    val animePics = animeRepository.getAnimePics()
+
     fun onStart() {
         if (animeBySeason.value !is Resource.Loading) {
             viewModelScope.launch {

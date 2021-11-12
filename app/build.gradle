@@ -130,4 +130,7 @@ dependencies {
 
     //ImageCropperLibrary
     implementation 'com.github.CanHub:Android-Image-Cropper:3.3.5'
+
+    //Coil
+    implementation "io.coil-kt:coil:1.4.0"
 }
