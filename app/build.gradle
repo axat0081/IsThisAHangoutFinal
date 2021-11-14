@@ -133,4 +133,11 @@ dependencies {
 
     //Coil
     implementation "io.coil-kt:coil:1.4.0"
+
+    //Jsoup
+    implementation 'org.jsoup:jsoup:1.13.1'
+
+    //Work Manager
+    def versions_work = "2.5.0"
+    implementation "androidx.work:work-runtime-ktx:$versions_work"
 }

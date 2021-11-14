@@ -102,6 +102,8 @@ class AnimeViewModel @Inject constructor(
 
     val animePics = animeRepository.getAnimePics()
 
+    val animeNews = animeRepository.getAnimeNews()
+
     fun onStart() {
         if (animeBySeason.value !is Resource.Loading) {
             viewModelScope.launch {

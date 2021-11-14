@@ -92,6 +92,10 @@ object RoomModule {
     @Singleton
     fun providesAnimePicsDao(db: AnimeDatabase): AnimePicsDao = db.getAnimePicsDao()
 
+    @Provides
+    @Singleton
+    fun providesAnimeNewsDao(db: AnimeDatabase): AnimeNewsDao = db.getAnimeNewsDao()
+
     ////Games
     @Provides
     @Singleton

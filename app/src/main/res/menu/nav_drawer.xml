@@ -42,5 +42,9 @@
         android:title="Favourites" />
     <item
         android:id="@+id/animePicsFragment"
-        android:title="Anime pics"/>
+        android:title="Anime pics" />
+    <item
+        android:id="@+id/animeNewsFragment"
+        android:icon="@drawable/news"
+        android:title="Otaku News" />
 </menu>

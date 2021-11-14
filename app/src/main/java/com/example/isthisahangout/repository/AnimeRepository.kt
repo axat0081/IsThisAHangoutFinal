@@ -12,7 +12,7 @@ import com.example.isthisahangout.models.*
 import com.example.isthisahangout.remotemediator.AiringAnimeRemoteMediator
 import com.example.isthisahangout.remotemediator.AnimeByGenreRemoteMediator
 import com.example.isthisahangout.remotemediator.UpcomingAnimeRemoteMediator
-import com.example.isthisahangout.room.anime.AnimeDatabase
+import com.example.isthisahangout.room.anime.*
 import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.utils.networkBoundResource
 import com.example.isthisahangout.utils.normalNetworkBoundResource
@@ -29,16 +29,18 @@ class AnimeRepository @Inject constructor(
     val api: AnimeAPI,
     val db: AnimeDatabase,
     private val quoteAPI: AnimeQuoteAPI,
-    private val animePicsAPI: AnimePicsAPI
+    private val animePicsAPI: AnimePicsAPI,
+    private val upcomingAnimeDao: UpcomingAnimeDao,
+    private val airingAnimeDao: AiringAnimeDao,
+    private val animeGenreDao: AnimeGenreDao,
+    private val animeBySeasonDao: AnimeBySeasonDao,
+    private val animeQuoteDoa: AnimeQuoteDao,
+    private val animeByNameDao: AnimeSearchByNameDao,
+    private val animeByDayDao: AnimeByDayDao,
+    private val animePicsDao: AnimePicsDao,
+    private val animeNewsDao: AnimeNewsDao
 ) {
-    private val upcomingAnimeDao = db.getUpcomingAnimeDao()
-    private val airingAnimeDao = db.getAiringAnimeDoa()
-    private val animeGenreDao = db.getAnimeByGenreDao()
-    private val animeBySeasonDao = db.getAnimeBySeasonDao()
-    private val animeQuoteDoa = db.getAnimeQuoteDao()
-    private val animeByNameDao = db.getAnimeByNameDao()
-    private val animeByDayDao = db.getAnimeByDayDao()
-    private val animePicsDao = db.getAnimePicsDao()
+
 
     fun getUpcomingAnime(): Flow<PagingData<UpcomingAnimeResponse.UpcomingAnime>> =
         Pager(
@@ -239,4 +241,6 @@ class AnimeRepository @Inject constructor(
             kotlinx.coroutines.delay(60000)
         }
     }
+
+    fun getAnimeNews(): Flow<List<AnimeNews>> = animeNewsDao.getAnimeNews()
 }

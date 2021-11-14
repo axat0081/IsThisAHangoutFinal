@@ -93,6 +93,13 @@
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
+        <action
+            android:id="@+id/action_homeFragment2_to_animeNewsFragment"
+            app:destination="@id/animeNewsFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
     <fragment
         android:id="@+id/chatsFragment2"
@@ -321,4 +328,9 @@
         android:name="com.example.isthisahangout.ui.navDrawer.AnimePicsFragment"
         android:label="Anime pics"
         tools:layout="@layout/fragment_anime_pics" />
+    <fragment
+        android:id="@+id/animeNewsFragment"
+        android:name="com.example.isthisahangout.ui.navDrawer.AnimeNewsFragment"
+        android:label="Otaku News"
+        tools:layout="@layout/fragment_anime_news" />
 </navigation>
