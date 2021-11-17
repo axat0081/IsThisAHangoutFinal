@@ -168,12 +168,28 @@
         android:id="@+id/animeByGenreFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeByGenreFragment"
         android:label="Anime By Genres"
-        tools:layout="@layout/fragment_anime_by_genre" />
+        tools:layout="@layout/fragment_anime_by_genre" >
+        <action
+            android:id="@+id/action_animeByGenreFragment_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/animeScheduleFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeScheduleFragment"
         android:label="Anime schedule"
-        tools:layout="@layout/fragment_anime_schedule" />
+        tools:layout="@layout/fragment_anime_schedule" >
+        <action
+            android:id="@+id/action_animeScheduleFragment_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.isthisahangout.ui.auth.LoginFragment"
@@ -279,7 +295,15 @@
         android:id="@+id/animeSeasonFragment2"
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeSeasonFragment"
         android:label="Search anime by season"
-        tools:layout="@layout/fragment_anime_season" />
+        tools:layout="@layout/fragment_anime_season" >
+        <action
+            android:id="@+id/action_animeSeasonFragment2_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_right" />
+    </fragment>
     <fragment
         android:id="@+id/animeQuoteFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeQuoteFragment"
@@ -289,7 +313,15 @@
         android:id="@+id/favouritesFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.FavouritesFragment"
         android:label="Favourites"
-        tools:layout="@layout/fragment_favourites" />
+        tools:layout="@layout/fragment_favourites" >
+        <action
+            android:id="@+id/action_favouritesFragment_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/videoDetailsFragment"
         android:name="com.example.isthisahangout.ui.detailsscreen.VideoDetailsFragment"
@@ -302,8 +334,8 @@
     <fragment
         android:id="@+id/songDetailFragment"
         android:name="com.example.isthisahangout.ui.detailsscreen.SongDetailFragment"
-        android:label="fragment_song_detail"
-        tools:layout="@layout/fragment_song_detail" >
+        android:label="Play Music"
+        tools:layout="@layout/fragment_song_detail">
         <argument
             android:name="song"
             app:argType="com.example.isthisahangout.models.Song" />
@@ -312,12 +344,28 @@
         android:id="@+id/animeByNameFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeByNameFragment"
         android:label="Search Anime By Name"
-        tools:layout="@layout/fragment_anime_by_name" />
+        tools:layout="@layout/fragment_anime_by_name" >
+        <action
+            android:id="@+id/action_animeByNameFragment_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/mangaFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.MangaFragment"
         android:label="Manga Corner"
-        tools:layout="@layout/fragment_manga" />
+        tools:layout="@layout/fragment_manga" >
+        <action
+            android:id="@+id/action_mangaFragment_to_detailDisplayFragment"
+            app:destination="@id/detailDisplayFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <dialog
         android:id="@+id/addComfortCharacterFragment"
         android:name="com.example.isthisahangout.ui.navDrawer.AddComfortCharacterFragment"
@@ -333,4 +381,13 @@
         android:name="com.example.isthisahangout.ui.navDrawer.AnimeNewsFragment"
         android:label="Otaku News"
         tools:layout="@layout/fragment_anime_news" />
+    <fragment
+        android:id="@+id/detailDisplayFragment"
+        android:name="com.example.isthisahangout.ui.detailsscreen.DetailDisplayFragment"
+        android:label="Details"
+        tools:layout="@layout/fragment_detail_display">
+        <argument
+            android:name="content"
+            app:argType="com.example.isthisahangout.models.AnimeGenreResults$AnimeByGenres" />
+    </fragment>
 </navigation>

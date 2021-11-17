@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ChatsFragment : Fragment(R.layout.fragment_chat) {
+class
+ChatsFragment : Fragment(R.layout.fragment_chat) {
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
 
@@ -61,7 +62,7 @@ class ChatsFragment : Fragment(R.layout.fragment_chat) {
                     messageEditText.text!!.clear()
                 }
                 hideKeyboard(requireContext())
-                messagesRecyclerview.scrollToPosition(0)
+                messagesRecyclerview.scrollToPosition(concatAdapter.itemCount - 1)
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.messagesFlow.collect {

@@ -8,12 +8,15 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.example.isthisahangout.MainActivity
+import com.example.isthisahangout.adapter.FirebaseMessageAdapter
+import com.example.isthisahangout.adapter.MessagesPagingAdapter
 import com.example.isthisahangout.models.FirebaseMessage
 import com.example.isthisahangout.pagingsource.MessagesPagingSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,6 +40,17 @@ class ChatViewModel @Inject constructor(
     val messagesFlow = Pager(PagingConfig(20)) {
         MessagesPagingSource()
     }.flow.cachedIn(viewModelScope)
+
+    val messagePagingAdapter = MessagesPagingAdapter()
+    val messageAdapter = FirebaseMessageAdapter()
+
+    init {
+        viewModelScope.launch {
+            messagesFlow.collect {
+                messagePagingAdapter.submitData(it)
+            }
+        }
+    }
 
     fun onSendClick() {
         Log.e("Message", text.toString())

@@ -9,6 +9,7 @@ import kotlinx.android.parcel.Parcelize
 data class AnimeGenreResults(
     val results: List<AnimeByGenres>
 ) {
+    @Parcelize
     data class AnimeByGenres(
         @SerializedName("mal_id") val id: String,
         val title: String,
@@ -16,7 +17,7 @@ data class AnimeGenreResults(
         val imageUrl: String,
         val url: String,
         val synopsis: String,
-    )
+    ):Parcelable
 }
 
 @Parcelize

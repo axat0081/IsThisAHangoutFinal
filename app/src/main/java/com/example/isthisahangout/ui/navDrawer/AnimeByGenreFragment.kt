@@ -5,13 +5,13 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeByGenreAdapter
 import com.example.isthisahangout.adapter.GeneralLoadStateAdapter
-import com.example.isthisahangout.adapter.MangaAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeByGenreBinding
-import com.example.isthisahangout.models.MangaResults
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.RoomAnimeByGenres
 import com.example.isthisahangout.viewmodel.AnimeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -90,8 +90,19 @@ class AnimeByGenreFragment : Fragment(R.layout.fragment_anime_by_genre),
 
         }
     }
-    override fun onItemClick(animeResults: RoomAnimeByGenres) {
 
+    override fun onItemClick(animeResults: RoomAnimeByGenres) {
+        findNavController().navigate(
+            AnimeByGenreFragmentDirections.actionAnimeByGenreFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    title = animeResults.title,
+                    synopsis = animeResults.synopsis,
+                    imageUrl = animeResults.imageUrl,
+                    url = animeResults.url,
+                    id = animeResults.id
+                )
+            )
+        )
     }
 
     override fun onDestroy() {

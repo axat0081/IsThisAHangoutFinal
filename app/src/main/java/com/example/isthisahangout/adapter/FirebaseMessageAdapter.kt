@@ -26,7 +26,7 @@ class FirebaseMessageAdapter :
         var options: FirestoreRecyclerOptions<FirebaseMessage> =
             FirestoreRecyclerOptions.Builder<FirebaseMessage>()
                 .setQuery(
-                    newMessagesQuery,
+                    newMessagesQuery.whereAfterTimestamp(),
                     FirebaseMessage::class.java
                 )
                 .build()

@@ -20,7 +20,7 @@ val messagesQuery by lazy {
 }
 
 val newMessagesQuery by lazy {
-    messagesQuery.whereAfterTimestamp()
+    messagesQuery
 }
 
 val postCollectionReference by lazy {

@@ -1,11 +1,11 @@
 package com.example.isthisahangout.ui.navDrawer
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.favourites.FavAnimeAdapter
@@ -13,6 +13,7 @@ import com.example.isthisahangout.adapter.favourites.FavGameAdapter
 import com.example.isthisahangout.adapter.favourites.FavPostAdapter
 import com.example.isthisahangout.adapter.favourites.FavVideosAdapter
 import com.example.isthisahangout.databinding.FragmentFavouritesBinding
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.favourites.FavAnime
 import com.example.isthisahangout.models.favourites.FavGame
 import com.example.isthisahangout.models.favourites.FavPost
@@ -100,7 +101,17 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites),
     }
 
     override fun onItemClick(anime: FavAnime) {
-        TODO("Not yet implemented")
+        findNavController().navigate(
+            FavouritesFragmentDirections.actionFavouritesFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    id = anime.id.toString(),
+                    title = anime.title,
+                    imageUrl = anime.image,
+                    url = "X",
+                    synopsis = "X"
+                )
+            )
+        )
     }
 
     override fun onItemClick(anime: FavVideo) {

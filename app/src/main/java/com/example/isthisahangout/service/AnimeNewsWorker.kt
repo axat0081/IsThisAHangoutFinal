@@ -17,12 +17,10 @@ class AnimeNewsWorker(
     context: Context,
     params: WorkerParameters
 ) : Worker(context, params) {
-    @Inject
-    private lateinit var animeNewsDao: AnimeNewsDao
     override fun doWork(): Result =
         try {
             CoroutineScope(Dispatchers.IO).launch {
-                val serverData = Jsoup.connect("https://www.cbr.com/tag/anime/").get()
+                val serverData = getHTML()
                 val div =
                     serverData.getElementsByClass("sentinel-tag-latestArticles browse-half clip-half")
                         .first()
@@ -46,8 +44,8 @@ class AnimeNewsWorker(
                         desc = desc
                     )
                 }
-                animeNewsDao.deleteAnimeNews()
-                animeNewsDao.insertAnimeNews(animeNews = articles)
+//                animeNewsDao.deleteAnimeNews()
+//                animeNewsDao.insertAnimeNews(animeNews = articles)
             }
             Result.success()
         } catch (exception: IOException) {
@@ -55,4 +53,5 @@ class AnimeNewsWorker(
         } catch (exception: HttpException) {
             Result.failure()
         }
+    private suspend fun getHTML() = Jsoup.connect("https://www.cbr.com/tag/anime/").get()
 }

@@ -12,11 +12,10 @@ class MessagesPagingSource :
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, FirebaseMessage> {
         return try {
-            val currentPage = params.key ?: messagesQuery.limit(5).get().await()
+            val currentPage = params.key ?: messagesQuery.limit(10).get().await()
             val lastDocumentSnapshot = currentPage.documents[currentPage.size() - 1]
             val nextPage = messagesQuery.limit(5).startAfter(lastDocumentSnapshot)
                 .get().await()
-            Log.e("Messages",currentPage.documents.toString())
             LoadResult.Page(
                 data = currentPage.toObjects(FirebaseMessage::class.java),
                 prevKey = null,

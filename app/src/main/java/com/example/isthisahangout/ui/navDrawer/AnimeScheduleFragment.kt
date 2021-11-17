@@ -6,10 +6,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeByDayAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeScheduleBinding
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.RoomAnimeByDay
 import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.viewmodel.AnimeViewModel
@@ -55,7 +57,7 @@ class AnimeScheduleFragment : Fragment(R.layout.fragment_anime_schedule),
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 animeViewModel.animeByDay.collect { result ->
-                    if(result==null) return@collect
+                    if (result == null) return@collect
                     animeProgressBar.isVisible = result is Resource.Loading
                     animeErrorTextView.isVisible = result is Resource.Error
                     animeAdapter.submitList(result.data)
@@ -65,7 +67,17 @@ class AnimeScheduleFragment : Fragment(R.layout.fragment_anime_schedule),
     }
 
     override fun onItemClick(anime: RoomAnimeByDay) {
-
+        findNavController().navigate(
+            AnimeScheduleFragmentDirections.actionAnimeScheduleFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    id = anime.id,
+                    synopsis = anime.synopsis,
+                    title = anime.title,
+                    imageUrl = anime.imageUrl,
+                    url = anime.url
+                )
+            )
+        )
     }
 
     override fun onDestroy() {

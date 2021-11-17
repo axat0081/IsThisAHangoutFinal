@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
@@ -13,6 +14,7 @@ import com.example.isthisahangout.adapter.GeneralLoadStateAdapter
 import com.example.isthisahangout.adapter.MangaAdapter
 import com.example.isthisahangout.adapter.MangaByGenreAdapter
 import com.example.isthisahangout.databinding.FragmentMangaBinding
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.MangaResults
 import com.example.isthisahangout.models.RoomMangaByGenre
 import com.example.isthisahangout.viewmodel.MangaViewModel
@@ -138,11 +140,32 @@ class MangaFragment : Fragment(R.layout.fragment_manga), MangaByGenreAdapter.OnI
     }
 
     override fun onItemClick(manga: MangaResults.Manga) {
-
+        findNavController().navigate(
+            MangaFragmentDirections.actionMangaFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    id = manga.id,
+                    title = manga.title,
+                    imageUrl = manga.imageUrl,
+                    synopsis = "X",
+                    url = manga.url
+                )
+            )
+        )
     }
 
     override fun onItemClick(manga: RoomMangaByGenre) {
 
+        findNavController().navigate(
+            MangaFragmentDirections.actionMangaFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    id = manga.id,
+                    title = manga.title,
+                    imageUrl = manga.imageUrl,
+                    synopsis = manga.synopsis,
+                    url = manga.url
+                )
+            )
+        )
     }
 
     override fun onDestroy() {

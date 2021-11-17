@@ -7,11 +7,13 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeByNameAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeByNameBinding
 import com.example.isthisahangout.models.AnimeByNameResults
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.viewmodel.AnimeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +55,17 @@ class AnimeByNameFragment : Fragment(R.layout.fragment_anime_by_name),
     }
 
     override fun onItemClick(anime: AnimeByNameResults.AnimeByName) {
-
+        findNavController().navigate(
+            AnimeByNameFragmentDirections.actionAnimeByNameFragmentToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    title = anime.title,
+                    imageUrl = anime.imageUrl,
+                    synopsis = anime.synopsis,
+                    url = anime.url,
+                    id = anime.id
+                )
+            )
+        )
     }
 
     override fun onDestroy() {

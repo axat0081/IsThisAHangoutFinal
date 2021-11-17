@@ -7,11 +7,13 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeSeasonAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeSeasonBinding
+import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.AnimeSeasonResults
 import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.viewmodel.AnimeViewModel
@@ -145,6 +147,20 @@ class AnimeSeasonFragment : Fragment(R.layout.fragment_anime_season),
 
     }
 
+    override fun onItemClick(anime: AnimeSeasonResults.RoomAnimeBySeason) {
+        findNavController().navigate(
+            AnimeSeasonFragmentDirections.actionAnimeSeasonFragment2ToDetailDisplayFragment(
+                AnimeGenreResults.AnimeByGenres(
+                    title = anime.title,
+                    url = anime.url,
+                    id = anime.id,
+                    synopsis = anime.synopsis,
+                    imageUrl = anime.imageUrl
+                )
+            )
+        )
+    }
+
     override fun onStart() {
         super.onStart()
         animeViewModel.onStart()
@@ -155,7 +171,4 @@ class AnimeSeasonFragment : Fragment(R.layout.fragment_anime_season),
         _binding = null
     }
 
-    override fun onItemClick(anime: AnimeSeasonResults.RoomAnimeBySeason) {
-        TODO("Not yet implemented")
-    }
 }

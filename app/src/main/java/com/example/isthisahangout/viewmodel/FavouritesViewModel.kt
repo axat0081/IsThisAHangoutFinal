@@ -8,9 +8,9 @@ import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.favourites.FavAnime
 import com.example.isthisahangout.models.favourites.FavGame
 import com.example.isthisahangout.models.favourites.FavPost
-import com.example.isthisahangout.models.favourites.FavVideo
 import com.example.isthisahangout.room.favourites.FavouritesDao
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +21,7 @@ class FavouritesViewModel @Inject constructor(
     state: SavedStateHandle
 ) : ViewModel() {
 
-
+    val isAnimeBookMarked = MutableStateFlow(false)
     val favAnimeQuery = state.getLiveData("AnimeQuery", "")
     val favGameQuery = state.getLiveData("GameQuery", "")
     val favPostQuery = state.getLiveData("PostQuery", "")
