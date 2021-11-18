@@ -37,7 +37,8 @@ class FirebaseAuthViewModel @Inject constructor(
         const val REGISTER = "Account Created"
         const val DEFAULTPFP =
             "https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75"
-
+        const val DEFAULTHEADER =
+            "https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75"
     }
 
     var loginEmail = state.get<String>("loginEmail") ?: ""
@@ -69,6 +70,11 @@ class FirebaseAuthViewModel @Inject constructor(
         set(value) {
             field = value
             state.set("profilePfp", profilePfp)
+        }
+    var profileHeader: Uri? = state.get<Uri>("profileHeader")
+        set(value) {
+            field = value
+            state.set("profileHeader", profileHeader)
         }
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -167,6 +173,9 @@ class FirebaseAuthViewModel @Inject constructor(
                                     snapshot.child("pfp").value.toString()
                                 MainActivity.userPfpObv.value =
                                     MainActivity.userpfp ?: ""
+                                MainActivity.userHeader = snapshot.child("header").value.toString()
+                                MainActivity.userHeaderObv.value =
+                                    MainActivity.userHeader ?: ""
                                 viewModelScope.launch {
                                     authChannel.send(
                                         AuthEvent.LoginSuccess(
@@ -204,7 +213,8 @@ class FirebaseAuthViewModel @Inject constructor(
                         User(
                             email = registrationEmail,
                             pfp = DEFAULTPFP,
-                            userName = registrationUsername
+                            userName = registrationUsername,
+                            header = DEFAULTHEADER
                         )
                     ).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -226,12 +236,36 @@ class FirebaseAuthViewModel @Inject constructor(
     }
 
 
-    fun onUpdateClick() {
+    fun onUpdatePfpClick() {
+        if (profilePfp == null) {
+            viewModelScope.launch {
+                authChannel.send(AuthEvent.UpdateProfileFailure("Please select a profile picture"))
+            }
+            return
+        }
         viewModelScope.launch {
             app.startService(
                 Intent(app, FirebaseUploadService::class.java)
                     .putExtra(FirebaseUploadService.EXTRA_FILE_URI, profilePfp)
                     .putExtra("path", "pfp")
+                    .setAction(FirebaseUploadService.ACTION_UPLOAD).apply {
+                    }
+            )
+        }
+    }
+
+    fun onUpdateHeaderClick() {
+        if (profileHeader == null) {
+            viewModelScope.launch {
+                authChannel.send(AuthEvent.UpdateProfileFailure("Please select a header for your profile"))
+            }
+            return
+        }
+        viewModelScope.launch {
+            app.startService(
+                Intent(app, FirebaseUploadService::class.java)
+                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, profilePfp)
+                    .putExtra("path", "header")
                     .setAction(FirebaseUploadService.ACTION_UPLOAD).apply {
                     }
             )

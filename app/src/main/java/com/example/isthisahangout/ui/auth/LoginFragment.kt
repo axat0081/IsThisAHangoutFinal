@@ -71,24 +71,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 event.message,
                                 Snackbar.LENGTH_SHORT
                             ).show()
-                            MainActivity.userId = mAuth.currentUser!!.uid
-                            userRef.child(MainActivity.userId!!)
-                                .addValueEventListener(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        MainActivity.username =
-                                            snapshot.child("userName").value.toString()
-                                        MainActivity.userpfp =
-                                            snapshot.child("pfp").value.toString()
-                                        findNavController().navigate(
-                                            LoginFragmentDirections.actionLoginFragmentToHomeFragment2()
-                                        )
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-                                        mAuth.signOut()
-                                        throw error.toException()
-                                    }
-                                })
+                            findNavController().navigate(
+                                LoginFragmentDirections.actionLoginFragmentToHomeFragment2()
+                            )
                         }
                         is FirebaseAuthViewModel.AuthEvent.LoginFailure -> {
                             loginProgressBar.isVisible = false

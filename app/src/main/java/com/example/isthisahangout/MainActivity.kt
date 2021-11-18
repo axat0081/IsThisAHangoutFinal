@@ -32,9 +32,11 @@ class MainActivity : AppCompatActivity() {
         var username: String? = null
         var userId: String? = null
         var userpfp: String? = null
+        var userHeader: String? = null
         val userNameObv = MutableStateFlow("abc")
         val userPfpObv = MutableStateFlow("https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75")
         val userIdObv = MutableStateFlow("abc1")
+        val userHeaderObv = MutableStateFlow("https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

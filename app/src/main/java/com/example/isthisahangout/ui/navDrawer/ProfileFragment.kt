@@ -55,7 +55,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
                 getProfilePfp.launch("image/*")
             }
             updateButton.setOnClickListener {
-                viewModel.onUpdateClick()
+                viewModel.onUpdatePfpClick()
             }
             comfortCharacterTextRecyclerview.apply {
                 adapter = comfortCharacterAdapter

@@ -42,6 +42,12 @@ object FirebaseModule {
 
     @Provides
     @Singleton
+    @Named("HeaderRef")
+    fun providesHeaderStorageRef(): StorageReference =
+        FirebaseStorage.getInstance().getReference("header")
+
+    @Provides
+    @Singleton
     @Named("PostImagesRef")
     fun providesPostImagesStorageRef(): StorageReference =
         FirebaseStorage.getInstance().getReference("postImages")

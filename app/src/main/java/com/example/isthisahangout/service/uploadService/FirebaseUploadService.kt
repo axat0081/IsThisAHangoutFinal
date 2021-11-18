@@ -36,6 +36,10 @@ class FirebaseUploadService : BaseService() {
     lateinit var pfpRef: StorageReference
 
     @Inject
+    @Named("HeaderRef")
+    lateinit var headerRef: StorageReference
+
+    @Inject
     @Named("PostImagesRef")
     lateinit var postImageRef: StorageReference
 
@@ -151,6 +155,10 @@ class FirebaseUploadService : BaseService() {
                     )!!
                     uploadComfortCharacter(character)
                 }
+                "header" -> {
+                    val fileUri = intent.getParcelableExtra<Uri>(EXTRA_FILE_URI)!!
+                    uploadHeaderFromUri(fileUri)
+                }
             }
         }
 
@@ -159,10 +167,8 @@ class FirebaseUploadService : BaseService() {
 
 
     private fun uploadPfpFromUri(fileUri: Uri) {
-        Log.e("FirebaseAuthViewModel4", fileUri.toString())
         taskStarted()
-        showProgressNotification(CAPTION, 0, 0, false)
-
+        showProgressNotification(CAPTION, 0, 0, true)
         fileUri.lastPathSegment?.let {
             val photoRef = pfpRef
             photoRef.child(it).putFile(fileUri)
@@ -177,43 +183,67 @@ class FirebaseUploadService : BaseService() {
                     if (!task.isSuccessful) {
                         throw task.exception!!
                     }
-
-                    // Request the public download URL
                     photoRef.child(it).downloadUrl
                 }.addOnSuccessListener { downloadUri ->
-                    // Upload succeeded
-
                     userRef.child(MainActivity.userId!!).child("pfp").setValue(
                         downloadUri.toString()
-                    )
-                        .addOnCompleteListener { updateTask ->
-                            if (updateTask.isSuccessful) {
-                                Log.d(TAG, "uploadFromUri: getDownloadUri success")
-
-                                // [START_EXCLUDE]
-                                broadcastUploadFinished(downloadUri, fileUri)
-                                showUploadFinishedNotification(downloadUri, fileUri)
-                                taskCompleted()
-                                // [END_EXCLUDE]
-                            } else {
-                                Log.w(TAG, "uploadFromUri:onFailure", updateTask.exception)
-
-                                // [START_EXCLUDE]
-                                broadcastUploadFinished(null, fileUri)
-                                showUploadFinishedNotification(null, fileUri)
-                                taskCompleted()
-                                // [END_EXCLUDE]
-                            }
+                    ).addOnCompleteListener { updateTask ->
+                        if (updateTask.isSuccessful) {
+                            broadcastUploadFinished(downloadUri, fileUri)
+                            showUploadFinishedNotification(downloadUri, fileUri)
+                            taskCompleted()
+                            // [END_EXCLUDE]
+                        } else {
+                            broadcastUploadFinished(null, fileUri)
+                            showUploadFinishedNotification(null, fileUri)
+                            taskCompleted()
                         }
+                    }
                 }.addOnFailureListener { exception ->
-                    // Upload failed
-                    Log.w(TAG, "uploadFromUri:onFailure", exception)
-
-                    // [START_EXCLUDE]
                     broadcastUploadFinished(null, fileUri)
                     showUploadFinishedNotification(null, fileUri)
                     taskCompleted()
-                    // [END_EXCLUDE]
+                }
+        }
+    }
+
+    private fun uploadHeaderFromUri(fileUri: Uri) {
+        taskStarted()
+        showProgressNotification(CAPTION, 0, 0, true)
+        fileUri.lastPathSegment?.let {
+            val photoRef = headerRef
+            photoRef.child(it).putFile(fileUri)
+                .addOnProgressListener { (bytesTransferred, totalByteCount) ->
+                    showProgressNotification(
+                        CAPTION,
+                        bytesTransferred,
+                        totalByteCount,
+                        false
+                    )
+                }.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        throw task.exception!!
+                    }
+                    photoRef.child(it).downloadUrl
+                }.addOnSuccessListener { downloadUri ->
+                    userRef.child(MainActivity.userId!!).child("header").setValue(
+                        downloadUri.toString()
+                    ).addOnCompleteListener { updateTask ->
+                        if (updateTask.isSuccessful) {
+                            broadcastUploadFinished(downloadUri, fileUri)
+                            showUploadFinishedNotification(downloadUri, fileUri)
+                            taskCompleted()
+                            // [END_EXCLUDE]
+                        } else {
+                            broadcastUploadFinished(null, fileUri)
+                            showUploadFinishedNotification(null, fileUri)
+                            taskCompleted()
+                        }
+                    }
+                }.addOnFailureListener { exception ->
+                    broadcastUploadFinished(null, fileUri)
+                    showUploadFinishedNotification(null, fileUri)
+                    taskCompleted()
                 }
         }
     }
@@ -591,7 +621,7 @@ class FirebaseUploadService : BaseService() {
                             from = character.from,
                             image = imageUri.toString()
                         )
-                    ).addOnCompleteListener { comfortCharaterUpload->
+                    ).addOnCompleteListener { comfortCharaterUpload ->
                         if (comfortCharaterUpload.isSuccessful) {
                             Log.d(TAG, "uploadFromUri: getDownloadUri success")
                             // [START_EXCLUDE]
