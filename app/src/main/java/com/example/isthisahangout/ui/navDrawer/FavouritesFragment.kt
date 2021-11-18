@@ -2,6 +2,7 @@ package com.example.isthisahangout.ui.navDrawer
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +51,38 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites),
             postSearchView.onQueryTextChanged {
                 viewModel.favPostQuery.value = it
             }
+            animeSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.favAnimeQuery.value = newText
+                    return true
+                }
+            })
+            gameSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.favGameQuery.value = newText
+                    return true
+                }
+            })
+            postSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.favPostQuery.value = newText
+                    return true
+                }
+            })
+            videoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.favVideoQuery.value = newText
+                    return true
+                }
+            })
             animeRecyclerview.apply {
                 adapter = animeAdapter
                 layoutManager =
@@ -115,14 +148,14 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites),
     }
 
     override fun onItemClick(anime: FavVideo) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onItemClick(anime: FavPost) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onItemClick(anime: FavGame) {
-        TODO("Not yet implemented")
+
     }
 }

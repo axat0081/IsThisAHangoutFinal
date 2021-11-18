@@ -5,6 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:openDrawer="start"
     tools:context=".MainActivity">
 
     <RelativeLayout
@@ -28,10 +29,8 @@
             android:orientation="vertical">
 
             <androidx.coordinatorlayout.widget.CoordinatorLayout
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-
 
                 <androidx.core.widget.NestedScrollView
                     android:id="@+id/bottom_sheet"
@@ -67,6 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/nav_drawer" />
+        app:menu="@menu/nav_drawer"
+        app:headerLayout="@layout/nav_header" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

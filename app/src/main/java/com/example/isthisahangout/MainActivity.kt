@@ -3,19 +3,22 @@ package com.example.isthisahangout
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.bumptech.glide.Glide
 import com.example.isthisahangout.databinding.ActivityMainBinding
+import com.example.isthisahangout.databinding.NavHeaderBinding
 import com.example.isthisahangout.utils.ConnectionLiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -30,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         var userId: String? = null
         var userpfp: String? = null
         val userNameObv = MutableStateFlow("abc")
-        val userPfpObv = MutableStateFlow("abc.com")
+        val userPfpObv = MutableStateFlow("https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75")
         val userIdObv = MutableStateFlow("abc1")
     }
 
@@ -60,6 +63,20 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNav.setupWithNavController(navController)
         binding.navView.setupWithNavController(navController)
+        val headerView = binding.navView.getHeaderView(0)
+        val headerBinding = NavHeaderBinding.bind(headerView)
+        this.lifecycleScope.launchWhenStarted {
+            userNameObv.collectLatest { name ->
+                headerBinding.navHeaderUsernameTextView.text = name
+            }
+        }
+        this.lifecycleScope.launchWhenStarted {
+            userPfpObv.collectLatest { image ->
+                Glide.with(applicationContext)
+                    .load(image)
+                    .into(headerBinding.navHeaderPfpImageview)
+            }
+        }
         navHostFragment.findNavController()
             .addOnDestinationChangedListener { controller, destination, arguments ->
                 when (destination.id) {

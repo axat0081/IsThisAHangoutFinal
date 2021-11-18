@@ -42,6 +42,7 @@
         android:title="Favourites" />
     <item
         android:id="@+id/animePicsFragment"
+        android:icon="@drawable/image"
         android:title="Anime pics" />
     <item
         android:id="@+id/animeNewsFragment"
