@@ -238,6 +238,13 @@
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
+        <action
+            android:id="@+id/action_profileFragment2_to_profileImageUpdateFragment"
+            app:destination="@id/profileImageUpdateFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
     <fragment
         android:id="@+id/postsDetailsFragment"
@@ -390,4 +397,8 @@
             android:name="content"
             app:argType="com.example.isthisahangout.models.AnimeGenreResults$AnimeByGenres" />
     </fragment>
+    <dialog
+        android:id="@+id/profileImageUpdateFragment"
+        android:name="com.example.isthisahangout.ui.navDrawer.ProfileImageUpdateFragment"
+        tools:layout="@layout/fragment_profile_image_update" />
 </navigation>

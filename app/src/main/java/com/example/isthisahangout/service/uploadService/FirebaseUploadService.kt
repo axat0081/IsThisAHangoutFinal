@@ -191,6 +191,8 @@ class FirebaseUploadService : BaseService() {
                         if (updateTask.isSuccessful) {
                             broadcastUploadFinished(downloadUri, fileUri)
                             showUploadFinishedNotification(downloadUri, fileUri)
+                            MainActivity.userpfp = downloadUri.toString()
+                            MainActivity.userPfpObv.value = downloadUri.toString()
                             taskCompleted()
                             // [END_EXCLUDE]
                         } else {
@@ -232,6 +234,8 @@ class FirebaseUploadService : BaseService() {
                         if (updateTask.isSuccessful) {
                             broadcastUploadFinished(downloadUri, fileUri)
                             showUploadFinishedNotification(downloadUri, fileUri)
+                            MainActivity.userHeader = downloadUri.toString()
+                            MainActivity.userHeaderObv.value = downloadUri.toString()
                             taskCompleted()
                             // [END_EXCLUDE]
                         } else {

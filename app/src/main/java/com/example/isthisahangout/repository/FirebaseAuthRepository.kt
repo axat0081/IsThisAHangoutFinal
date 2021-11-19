@@ -50,7 +50,8 @@ class FirebaseAuthRepository @Inject constructor(
                     User(
                         userName = username,
                         email = email,
-                        pfp = DEFAULTPFP
+                        pfp = DEFAULTPFP,
+                        header = DEFAULTPFP
                     )
                 ).addOnCompleteListener { task2 ->
                     if (!task2.isSuccessful) {
@@ -59,7 +60,6 @@ class FirebaseAuthRepository @Inject constructor(
                         Log.e("enic","hello")
                         result.result = true
                         result.message = REGISTER
-
                     }
                 }
             }

@@ -1,13 +1,11 @@
 package com.example.isthisahangout.ui.navDrawer
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -27,6 +25,7 @@ import com.example.isthisahangout.viewmodel.FirebaseAuthViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -34,28 +33,25 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
     ComfortCharacterAdapter.OnItemClickListener {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
-    private val viewModel by viewModels<FirebaseAuthViewModel>()
+    private val viewModel by activityViewModels<FirebaseAuthViewModel>()
     private lateinit var comfortCharacterAdapter: ComfortCharacterAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentProfileBinding.bind(view)
-        val getProfilePfp =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    viewModel.profilePfp = uri
-                }
-            }
         comfortCharacterAdapter = ComfortCharacterAdapter(this)
         binding.apply {
             usernameTextView.text = MainActivity.username
-            Glide.with(requireContext())
-                .load(MainActivity.userpfp)
-                .into(pfpImageView)
-            pfpImageView.setOnClickListener {
-                getProfilePfp.launch("image/*")
+            pfpImageview.setOnClickListener {
+                viewModel.imageTag.value = "pfp"
+                findNavController().navigate(
+                    ProfileFragmentDirections.actionProfileFragment2ToProfileImageUpdateFragment()
+                )
             }
-            updateButton.setOnClickListener {
-                viewModel.onUpdatePfpClick()
+            headerImageView.setOnClickListener {
+                viewModel.imageTag.value = "header"
+                findNavController().navigate(
+                    ProfileFragmentDirections.actionProfileFragment2ToProfileImageUpdateFragment()
+                )
             }
             comfortCharacterTextRecyclerview.apply {
                 adapter = comfortCharacterAdapter
@@ -66,6 +62,41 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
                 findNavController().navigate(
                     ProfileFragmentDirections.actionProfileFragment2ToAddComfortCharacterFragment()
                 )
+            }
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                MainActivity.userPfpObv.collectLatest { pfp ->
+                    Glide.with(requireContext())
+                        .load(pfp)
+                        .into(pfpImageview)
+                }
+            }
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                MainActivity.userHeaderObv.collectLatest { header ->
+                    Glide.with(requireContext())
+                        .load(header)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable>?,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                imageProgressBar.isVisible = false
+                                return false
+                            }
+
+                            override fun onResourceReady(
+                                resource: Drawable?,
+                                model: Any?,
+                                target: Target<Drawable>?,
+                                dataSource: DataSource?,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                imageProgressBar.isVisible = false
+                                return false
+                            }
+                        }).into(headerImageView)
+                }
             }
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.profileFlow.collect { event ->
@@ -97,7 +128,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
                                         pfpProgressBar.isVisible = false
                                         return false
                                     }
-                                }).into(pfpImageView)
+                                }).into(pfpImageview)
                         }
                         is FirebaseAuthViewModel.AuthEvent.RegistrationFailure -> {
                             Snackbar.make(

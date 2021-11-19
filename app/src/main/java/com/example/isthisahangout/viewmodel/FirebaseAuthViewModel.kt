@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -86,6 +87,7 @@ class FirebaseAuthViewModel @Inject constructor(
     val loginFlow = authChannel.receiveAsFlow()
     val registrationFlow = authChannel.receiveAsFlow()
     val profileFlow = authChannel.receiveAsFlow()
+    val imageTag = MutableStateFlow("pfp")
     fun onLoginClick() {
         if (loginPassword.isBlank()) {
             viewModelScope.launch {
@@ -264,7 +266,7 @@ class FirebaseAuthViewModel @Inject constructor(
         viewModelScope.launch {
             app.startService(
                 Intent(app, FirebaseUploadService::class.java)
-                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, profilePfp)
+                    .putExtra(FirebaseUploadService.EXTRA_FILE_URI, profileHeader)
                     .putExtra("path", "header")
                     .setAction(FirebaseUploadService.ACTION_UPLOAD).apply {
                     }
