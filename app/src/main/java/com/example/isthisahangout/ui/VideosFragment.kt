@@ -3,6 +3,8 @@ package com.example.isthisahangout.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,6 +18,7 @@ import com.example.isthisahangout.adapter.VideosPagingAdapter
 import com.example.isthisahangout.adapter.VideosRecyclerAdapter
 import com.example.isthisahangout.databinding.FragmentVideosBinding
 import com.example.isthisahangout.models.FirebaseVideo
+import com.example.isthisahangout.utils.startAnimation
 import com.example.isthisahangout.viewmodel.VideoViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -36,11 +39,21 @@ class VideosFragment : Fragment(R.layout.fragment_videos), VideosPagingAdapter.O
             videosPagingAdapter,
             videosRecyclerAdapter
         )
+        val animation =
+            AnimationUtils.loadAnimation(requireContext(), R.anim.circle_explosion_anim).apply {
+                duration = 1000
+                interpolator = AccelerateDecelerateInterpolator()
+            }
         binding.apply {
             postVideoButton.setOnClickListener {
-                findNavController().navigate(
-                    VideosFragmentDirections.actionVideosFragment2ToUploadVideoFragment()
-                )
+                binding.postVideoButton.isVisible = false
+                circleBackground.isVisible = true
+                circleBackground.startAnimation(animation){
+                    circleBackground.isVisible = false
+                    findNavController().navigate(
+                        VideosFragmentDirections.actionVideosFragment2ToUploadVideoFragment()
+                    )
+                }
             }
             videosRecyclerview.apply {
                 itemAnimator = null
@@ -78,7 +91,6 @@ class VideosFragment : Fragment(R.layout.fragment_videos), VideosPagingAdapter.O
     }
 
     override fun onItemClick(video: FirebaseVideo) {
-        Log.e("Navigation", "Navigating")
         findNavController().navigate(
             VideosFragmentDirections.actionVideosFragment2ToVideoDetailsFragment(video)
         )

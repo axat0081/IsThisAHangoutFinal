@@ -2,6 +2,8 @@ package com.example.isthisahangout.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +17,7 @@ import com.example.isthisahangout.adapter.PostsPagingAdapter
 import com.example.isthisahangout.adapter.PostsRecyclerAdapter
 import com.example.isthisahangout.databinding.FragmentPostsBinding
 import com.example.isthisahangout.models.FirebasePost
+import com.example.isthisahangout.utils.startAnimation
 import com.example.isthisahangout.viewmodel.PostViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -36,6 +39,11 @@ class PostsFragment : Fragment(R.layout.fragment_posts), PostsPagingAdapter.OnIt
             postsRecyclerAdapter,
             postsPagingAdapter
         )
+        val animation =
+            AnimationUtils.loadAnimation(requireContext(), R.anim.circle_explosion_anim).apply {
+                duration = 1000
+                interpolator = AccelerateDecelerateInterpolator()
+            }
         binding.apply {
             postsRecyclerview.apply {
                 layoutManager =
@@ -63,9 +71,14 @@ class PostsFragment : Fragment(R.layout.fragment_posts), PostsPagingAdapter.OnIt
             }
 
             createPostsButton.setOnClickListener {
-                findNavController().navigate(
-                    PostsFragmentDirections.actionPostsFragment2ToCreatePostFragment()
-                )
+                createPostsButton.isVisible = false
+                circleBackground.isVisible = true
+                circleBackground.startAnimation(animation) {
+                    binding.circleBackground.isVisible = false
+                    findNavController().navigate(
+                        PostsFragmentDirections.actionPostsFragment2ToCreatePostFragment()
+                    )
+                }
             }
         }
     }

@@ -113,11 +113,7 @@
         tools:layout="@layout/fragment_videos" >
         <action
             android:id="@+id/action_videosFragment2_to_uploadVideoFragment"
-            app:destination="@id/uploadVideoFragment"
-            app:enterAnim="@anim/from_left"
-            app:exitAnim="@anim/to_right"
-            app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
+            app:destination="@id/uploadVideoFragment" />
         <action
             android:id="@+id/action_videosFragment2_to_videoDetailsFragment"
             app:destination="@id/videoDetailsFragment"
@@ -258,15 +254,11 @@
     <fragment
         android:id="@+id/createPostFragment"
         android:name="com.example.isthisahangout.ui.createContent.CreatePostFragment"
-        android:label="fragment_create_post"
+        android:label="Create a post"
         tools:layout="@layout/fragment_create_post">
         <action
             android:id="@+id/action_createPostFragment_to_postsFragment2"
-            app:destination="@id/postsFragment2"
-            app:enterAnim="@anim/from_left"
-            app:exitAnim="@anim/to_right"
-            app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
+            app:destination="@id/postsFragment2" />
     </fragment>
     <fragment
         android:id="@+id/songFragment"
@@ -296,7 +288,7 @@
     <fragment
         android:id="@+id/uploadVideoFragment"
         android:name="com.example.isthisahangout.ui.createContent.UploadVideoFragment"
-        android:label="Post Video"
+        android:label="Post a video"
         tools:layout="@layout/fragment_upload_video" />
     <fragment
         android:id="@+id/animeSeasonFragment2"
