@@ -1,5 +1,6 @@
 package com.example.isthisahangout.adapter
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -61,6 +62,7 @@ class VideosRecyclerAdapter(private val listener: OnItemClickListener) :
             }
         }
 
+        @SuppressLint("SetTextI18n")
         fun bind(video: FirebaseVideo) {
             binding.apply {
                 binding.apply {
@@ -89,7 +91,11 @@ class VideosRecyclerAdapter(private val listener: OnItemClickListener) :
                                 return false
                             }
                         }).into(videoThumbnailImageView)
-                    videoTitleTextView.text = video.title
+                    Glide.with(itemView)
+                        .load(video.pfp)
+                        .into(videoUploaderPfpImageview)
+                    videoTitleTextview.text = video.title
+                    uploaderUsernameTextView.text = "Uploaded by - ${video.username}"
                 }
 
             }

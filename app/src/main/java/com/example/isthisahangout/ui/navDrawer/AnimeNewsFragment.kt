@@ -2,6 +2,7 @@ package com.example.isthisahangout.ui.navDrawer
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -9,6 +10,7 @@ import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AnimeNewsAdapter
 import com.example.isthisahangout.databinding.FragmentAnimeNewsBinding
 import com.example.isthisahangout.models.AnimeNews
+import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.viewmodel.AnimeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -28,8 +30,14 @@ class AnimeNewsFragment : Fragment(R.layout.fragment_anime_news),
                 adapter = animeNewsAdapter
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.animeNews.collect {
-                    animeNewsAdapter.submitList(it)
+                viewModel.animeNews.collect { result ->
+//                    animeNewsAdapter.submitList(result.data)
+//                    animeNewsProgressBar.isVisible =
+//                        result is Resource.Loading && result.data.isNullOrEmpty()
+//                    animeNewsErrorTextView.isVisible =
+//                        result is Resource.Error && result.data.isNullOrEmpty()
+//                    animeNewsErrorTextView.text =
+//                        result.error?.localizedMessage ?: "Aw snap an error occurred"
                 }
             }
         }

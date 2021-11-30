@@ -37,8 +37,8 @@ class GeneralLoadStateAdapter(private val retry: () -> Unit) :
         fun bind(loadState: LoadState) {
             binding.apply {
                 loadStateProgressBar.isVisible = loadState is LoadState.Loading
-                loadStateErrorTextView.isVisible = loadState !is LoadState.Error
-                loadStateRetryButton.isVisible = loadState !is LoadState.Error
+                loadStateErrorTextView.isVisible = loadState is LoadState.Error
+                loadStateRetryButton.isVisible = loadState is LoadState.Error
             }
         }
     }

@@ -51,7 +51,7 @@ ChatsFragment : Fragment(R.layout.fragment_chat) {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
             }
-            messagesRecyclerview.scrollToPosition(concatAdapter.itemCount - 1)
+            messagesRecyclerview.scrollToPosition(0)
             messageEditText.addTextChangedListener { text ->
                 viewModel.text = text.toString()
                 Log.e("MessageFragment", text.toString())
@@ -62,12 +62,12 @@ ChatsFragment : Fragment(R.layout.fragment_chat) {
                     messageEditText.text!!.clear()
                 }
                 hideKeyboard(requireContext())
-                messagesRecyclerview.scrollToPosition(concatAdapter.itemCount - 1)
+                //messagesRecyclerview.scrollToPosition(0)
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.messagesFlow.collect {
                     pagedMessageAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-                    messagesRecyclerview.scrollToPosition(concatAdapter.itemCount - 1)
+                   // messagesRecyclerview.scrollToPosition(0)
                 }
                 viewModel.messageEventFlow.collect { event ->
                     if (event is ChatViewModel.MessagingEvent.MessageError) {

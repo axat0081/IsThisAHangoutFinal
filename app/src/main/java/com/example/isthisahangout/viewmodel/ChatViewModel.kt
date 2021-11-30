@@ -41,17 +41,6 @@ class ChatViewModel @Inject constructor(
         MessagesPagingSource()
     }.flow.cachedIn(viewModelScope)
 
-    val messagePagingAdapter = MessagesPagingAdapter()
-    val messageAdapter = FirebaseMessageAdapter()
-
-    init {
-        viewModelScope.launch {
-            messagesFlow.collect {
-                messagePagingAdapter.submitData(it)
-            }
-        }
-    }
-
     fun onSendClick() {
         Log.e("Message", text.toString())
         if (text?.isNotEmpty() == true) {

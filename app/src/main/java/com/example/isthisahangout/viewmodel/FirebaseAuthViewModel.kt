@@ -93,6 +93,7 @@ class FirebaseAuthViewModel @Inject constructor(
             viewModelScope.launch {
                 authChannel.send(AuthEvent.LoginFailure("Password cannot be empty"))
             }
+            return
         }
         if (loginEmail.isBlank()) {
             if (mAuth.currentUser == null) {
@@ -208,6 +209,18 @@ class FirebaseAuthViewModel @Inject constructor(
     }
 
     fun onRegistrationClick() {
+        if(registrationEmail.isBlank()){
+            viewModelScope.launch {
+                authChannel.send(AuthEvent.RegistrationFailure("Email cannot be empty"))
+            }
+            return
+        }
+        if(registrationPassword.isBlank()){
+            viewModelScope.launch {
+                authChannel.send(AuthEvent.RegistrationFailure("Password cannot be empty"))
+            }
+            return
+        }
         mAuth.createUserWithEmailAndPassword(registrationEmail, registrationPassword)
             .addOnCompleteListener { registration ->
                 if (registration.isSuccessful) {

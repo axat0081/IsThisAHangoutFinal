@@ -1,5 +1,6 @@
 package com.example.isthisahangout.adapter.favourites
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -57,6 +58,7 @@ class FavVideosAdapter(private val listener: OnItemClickListener) :
             }
         }
 
+        @SuppressLint("SetTextI18n")
         fun bind(video: FavVideo) {
             binding.apply {
                 Glide.with(itemView)
@@ -83,7 +85,11 @@ class FavVideosAdapter(private val listener: OnItemClickListener) :
                             return false
                         }
                     }).into(videoThumbnailImageView)
-                videoTitleTextView.text = video.title
+                Glide.with(itemView)
+                    .load(video.pfp)
+                    .into(videoUploaderPfpImageview)
+                videoTitleTextview.text = video.title
+                uploaderUsernameTextView.text = "Uploaded by - ${video.username}"
             }
         }
     }

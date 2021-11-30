@@ -18,6 +18,7 @@ import com.example.isthisahangout.utils.networkBoundResource
 import com.example.isthisahangout.utils.normalNetworkBoundResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.jsoup.Jsoup
 import retrofit2.HttpException
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -242,5 +243,39 @@ class AnimeRepository @Inject constructor(
         }
     }
 
-    fun getAnimeNews(): Flow<List<AnimeNews>> = animeNewsDao.getAnimeNews()
+    fun getAnimeNews(): Flow<Resource<List<AnimeNews>>> = flow {
+        emit(Resource.Loading(data = emptyList<AnimeNews>()))
+        val serverData = scrapNews()
+        try {
+            val serverData = scrapNews()
+            val div =
+                serverData.getElementsByClass("sentinel-tag-latestArticles browse-half clip-half")
+                    .first()
+            val articles = div.getElementsByTag("article").map { article ->
+                val linkTag = article.getElementsByClass("bc-img-link")
+                val url = linkTag.attr("href")
+                val imageTag = article.getElementsByTag("source").first()
+                val image: String =
+                    if (imageTag.hasAttr("srcset"))
+                        imageTag.attr("srcset")
+                    else
+                        imageTag.attr("data-srcset")
+                val title = article.getElementsByClass("bc-title-link").text().trim()
+                val author = article.getElementsByClass("bc-author").text().trim()
+                val desc = article.getElementsByClass("bc-excerpt").text().trim()
+                AnimeNews(
+                    title = title,
+                    image = image,
+                    url = url,
+                    author = author,
+                    desc = desc
+                )
+            }
+            emit(Resource.Success(data = articles))
+        } catch (exception: Exception) {
+            emit(Resource.Error(throwable = exception, data = emptyList<AnimeNews>()))
+        }
+    }
+
+    suspend fun scrapNews() = Jsoup.connect("https://www.cbr.com/tag/anime/").get()
 }

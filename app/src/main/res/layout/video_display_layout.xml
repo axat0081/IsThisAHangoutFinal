@@ -2,38 +2,76 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_marginTop="10dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp">
 
-    <TextView
-        android:id="@+id/video_title_text_view"
+    <RelativeLayout
+        android:id="@+id/thumbnail_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="@color/mypink"
-        tools:text="Video Title" />
+        android:layout_height="wrap_content">
 
-    <ProgressBar
-        android:id="@+id/video_thumbnail_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#26000000" />
 
-    <ImageView
-        android:id="@+id/video_thumbnail_image_view"
+        <ProgressBar
+            android:id="@+id/video_thumbnail_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true" />
+
+        <ImageView
+            android:id="@+id/video_thumbnail_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="fitCenter"
+            tools:src="@mipmap/ic_launcher" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/video_meta_data_layout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_below="@id/video_title_text_view"
+        android:padding="10dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/thumbnail_layout"
         android:layout_marginTop="10dp"
-        android:scaleType="fitCenter"
-        tools:src="@mipmap/ic_launcher" />
+        android:background="@color/myblack"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:layout_below="@id/video_thumbnail_image_view"
-        android:layout_marginTop="10dp" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/video_uploader_pfp_imageview"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="20dp"
+            tools:src="@mipmap/ic_launcher_round" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/video_title_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/mypink"
+                tools:text="Video Title goes here" />
+
+            <TextView
+                android:id="@+id/uploader_username_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/myblue"
+                tools:text="Uploaded by - Username here" />
+        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>

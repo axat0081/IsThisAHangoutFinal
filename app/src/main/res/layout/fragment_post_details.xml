@@ -90,7 +90,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="170dp" />
 
-            <com.github.chrisbanes.photoview.PhotoView
+            <ImageView
                 android:id="@+id/post_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -99,7 +99,9 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:adjustViewBounds="true"
-                android:maxHeight="400dp" />
+                android:maxHeight="400dp"
+                android:transitionName="image_small"
+                tools:src="@mipmap/ic_launcher" />
 
             <LinearLayout
                 android:id="@+id/layout2"
@@ -175,12 +177,12 @@
                 android:layout_below="@id/comment_text_view"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/myblue"
                 android:layout_marginEnd="10dp"
                 android:layout_toStartOf="@id/comment_send_button"
                 android:layout_toEndOf="@id/add_comment_image_button"
                 android:backgroundTint="@color/myblue"
                 android:hint="Comment here..."
+                android:textColor="@color/myblue"
                 android:textColorHint="@color/mypink" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -197,20 +199,19 @@
                 android:id="@+id/add_comment_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_marginTop="10dp"
-                tools:src = "@mipmap/ic_launcher"
-                tools:visibility="visible"
-                android:visibility="invisible"
                 android:layout_below="@id/comment_send_button"
-                />
+                android:layout_marginTop="10dp"
+                android:visibility="invisible"
+                tools:src="@mipmap/ic_launcher"
+                tools:visibility="visible" />
 
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/commentsRecyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
                 android:layout_below="@id/add_comment_image_view"
+                android:layout_marginTop="10dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/comments_display_layout" />
 

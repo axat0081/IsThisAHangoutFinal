@@ -3,6 +3,7 @@ package com.example.isthisahangout.utils
 import android.util.Log
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.adapter.whereAfterTimestamp
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,10 +18,13 @@ val chatCollectionReference by lazy {
 val messagesQuery by lazy {
     chatCollectionReference
         .orderBy("time", Query.Direction.DESCENDING)
+        .whereLessThan("time", Timestamp.now())
 }
 
 val newMessagesQuery by lazy {
-    messagesQuery
+    chatCollectionReference
+        .orderBy("time", Query.Direction.DESCENDING)
+        .whereAfterTimestamp()
 }
 
 val postCollectionReference by lazy {
@@ -63,7 +67,7 @@ val newSongQuery by lazy {
 }
 
 val comfortCharacterQuery by lazy {
-    Log.e("ID",MainActivity.userId!!)
+    Log.e("ID", MainActivity.userId!!)
     FirebaseDatabase.getInstance().reference
         .child("comfortCharacters").child(FirebaseAuth.getInstance().currentUser!!.uid)
 }
