@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.User
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
 import com.google.firebase.auth.FirebaseAuth
@@ -17,9 +16,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.CollectionReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,7 +31,8 @@ class FirebaseAuthViewModel @Inject constructor(
     private val app: Application,
     val state: SavedStateHandle,
     private val mAuth: FirebaseAuth,
-    @Named("UserRef") private val userRef: DatabaseReference
+    @Named("UserDataRef") private val userRef: DatabaseReference,
+    @Named("UserRef") private val userCollectionRef: CollectionReference
 ) : AndroidViewModel(app) {
 
     companion object {
@@ -41,6 +43,18 @@ class FirebaseAuthViewModel @Inject constructor(
         const val DEFAULTHEADER =
             "https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75"
     }
+
+    private val _userId = MutableStateFlow("")
+    val userId: StateFlow<String> = _userId
+
+    private val _username = MutableStateFlow("")
+    val username: StateFlow<String> = _username
+
+    private val _userPfp = MutableStateFlow("")
+    val userPfp: StateFlow<String> = _userPfp
+
+    private val _userHeader = MutableStateFlow("")
+    val userHeader: StateFlow<String> = _userHeader
 
     var loginEmail = state.get<String>("loginEmail") ?: ""
         set(value) {
@@ -80,7 +94,11 @@ class FirebaseAuthViewModel @Inject constructor(
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             Log.e("FirebaseAuthViewModel", "onReceive:$intent")
-            updatePfpResult(intent)
+            val type = intent.getStringExtra(FirebaseUploadService.TYPE_OF_UPLOAD)
+            if (type == "header")
+                updateHeaderResult(intent)
+            else if (type == "pfp")
+                updatePfpResult(intent)
         }
     }
     private val authChannel = Channel<AuthEvent>()
@@ -111,17 +129,13 @@ class FirebaseAuthViewModel @Inject constructor(
                                         userRef.child(mAuth.currentUser!!.uid)
                                             .addValueEventListener(object : ValueEventListener {
                                                 override fun onDataChange(snapshot: DataSnapshot) {
-                                                    MainActivity.userId = mAuth.currentUser!!.uid
-                                                    MainActivity.userIdObv.value =
-                                                        MainActivity.userId ?: ""
-                                                    MainActivity.username =
+                                                    _userId.value = mAuth.currentUser!!.uid
+                                                    _username.value =
                                                         snapshot.child("userName").value.toString()
-                                                    MainActivity.userNameObv.value =
-                                                        MainActivity.username ?: ""
-                                                    MainActivity.userpfp =
+                                                    _userPfp.value =
                                                         snapshot.child("pfp").value.toString()
-                                                    MainActivity.userPfpObv.value =
-                                                        MainActivity.userpfp ?: ""
+                                                    _userHeader.value =
+                                                        snapshot.child("header").value.toString()
                                                     viewModelScope.launch {
                                                         authChannel.send(
                                                             AuthEvent.LoginSuccess(
@@ -162,23 +176,14 @@ class FirebaseAuthViewModel @Inject constructor(
         mAuth.signInWithEmailAndPassword(loginEmail, loginPassword)
             .addOnCompleteListener { login ->
                 if (login.isSuccessful) {
-                    userRef.child(mAuth.currentUser!!.uid)
-                        .addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                MainActivity.userId = mAuth.currentUser!!.uid
-                                MainActivity.userIdObv.value =
-                                    MainActivity.userId ?: ""
-                                MainActivity.username =
-                                    snapshot.child("userName").value.toString()
-                                MainActivity.userNameObv.value =
-                                    MainActivity.username ?: ""
-                                MainActivity.userpfp =
-                                    snapshot.child("pfp").value.toString()
-                                MainActivity.userPfpObv.value =
-                                    MainActivity.userpfp ?: ""
-                                MainActivity.userHeader = snapshot.child("header").value.toString()
-                                MainActivity.userHeaderObv.value =
-                                    MainActivity.userHeader ?: ""
+                    userCollectionRef.document(mAuth.currentUser!!.uid)
+                        .get().addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                val snapshot = it.result
+                                _userId.value = mAuth.currentUser!!.uid
+                                _username.value = snapshot?.getString("userName") ?: ""
+                                _userPfp.value = snapshot?.getString("pfp") ?: ""
+                                _userHeader.value = snapshot?.getString("header") ?: ""
                                 viewModelScope.launch {
                                     authChannel.send(
                                         AuthEvent.LoginSuccess(
@@ -186,21 +191,25 @@ class FirebaseAuthViewModel @Inject constructor(
                                         )
                                     )
                                 }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
+                            } else {
                                 mAuth.signOut()
+                                var msg = "An error occurred"
+                                if (it.exception != null) {
+                                    msg = it.exception!!.localizedMessage ?: "An error occurred"
+                                }
+                                Log.e("Error", "Hey1")
                                 viewModelScope.launch {
                                     authChannel.send(
                                         AuthEvent.LoginFailure(
-                                            error.message
+                                            msg
                                         )
                                     )
                                 }
                             }
-                        })
+                        }
                 } else {
                     viewModelScope.launch {
+                        Log.e("Error", "Hey2")
                         authChannel.send(AuthEvent.LoginFailure(login.exception.toString()))
                     }
                 }
@@ -209,13 +218,13 @@ class FirebaseAuthViewModel @Inject constructor(
     }
 
     fun onRegistrationClick() {
-        if(registrationEmail.isBlank()){
+        if (registrationEmail.isBlank()) {
             viewModelScope.launch {
                 authChannel.send(AuthEvent.RegistrationFailure("Email cannot be empty"))
             }
             return
         }
-        if(registrationPassword.isBlank()){
+        if (registrationPassword.isBlank()) {
             viewModelScope.launch {
                 authChannel.send(AuthEvent.RegistrationFailure("Password cannot be empty"))
             }
@@ -224,24 +233,29 @@ class FirebaseAuthViewModel @Inject constructor(
         mAuth.createUserWithEmailAndPassword(registrationEmail, registrationPassword)
             .addOnCompleteListener { registration ->
                 if (registration.isSuccessful) {
-                    userRef.child(mAuth.currentUser!!.uid).setValue(
-                        User(
-                            email = registrationEmail,
-                            pfp = DEFAULTPFP,
-                            userName = registrationUsername,
-                            header = DEFAULTHEADER
-                        )
-                    ).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            viewModelScope.launch {
-                                authChannel.send(AuthEvent.RegistrationSuccess(REGISTER))
-                            }
-                        } else {
-                            viewModelScope.launch {
-                                authChannel.send(AuthEvent.RegistrationFailure(task.exception.toString()))
+                    userCollectionRef.document(mAuth.currentUser!!.uid)
+                        .set(
+                            User(
+                                email = registrationEmail,
+                                pfp = DEFAULTPFP,
+                                userName = registrationUsername,
+                                header = DEFAULTHEADER
+                            )
+                        ).addOnCompleteListener { task ->
+
+                            if (task.isSuccessful) {
+                                _username.value = registrationUsername
+                                _userPfp.value = DEFAULTPFP
+                                _userId.value = mAuth.currentUser!!.uid
+                                viewModelScope.launch {
+                                    authChannel.send(AuthEvent.RegistrationSuccess(REGISTER))
+                                }
+                            } else {
+                                viewModelScope.launch {
+                                    authChannel.send(AuthEvent.RegistrationFailure(task.exception.toString()))
+                                }
                             }
                         }
-                    }
                 } else {
                     viewModelScope.launch {
                         authChannel.send(AuthEvent.RegistrationFailure(registration.exception.toString()))
@@ -294,6 +308,19 @@ class FirebaseAuthViewModel @Inject constructor(
                 authChannel.send(AuthEvent.UpdateProfileFailure("Image could not be updated"))
             } else {
                 authChannel.send(AuthEvent.UpdateProfileSuccess("Image updates", profilePfp!!))
+                _userPfp.value = profilePfp.toString()
+            }
+        }
+    }
+
+    fun updateHeaderResult(intent: Intent) {
+        viewModelScope.launch {
+            profileHeader = intent.getParcelableExtra(FirebaseUploadService.EXTRA_DOWNLOAD_URL)
+            if (profileHeader == null) {
+                authChannel.send(AuthEvent.UpdateProfileFailure("Image could not be updated"))
+            } else {
+                authChannel.send(AuthEvent.UpdateProfileSuccess("Image updates", profileHeader!!))
+                _userHeader.value = profileHeader.toString()
             }
         }
     }

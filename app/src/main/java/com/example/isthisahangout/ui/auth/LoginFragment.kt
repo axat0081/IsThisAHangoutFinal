@@ -8,32 +8,21 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.FragmentLoginBinding
 import com.example.isthisahangout.viewmodel.FirebaseAuthViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
-import javax.inject.Named
 
 @AndroidEntryPoint
 class LoginFragment : Fragment(R.layout.fragment_login) {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-
-    @Inject
-    @Named("UserRef")
-    lateinit var userRef: DatabaseReference
 
     @Inject
     lateinit var mAuth: FirebaseAuth
@@ -49,9 +38,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             }
             passwordEditText.editText!!.addTextChangedListener { password ->
                 viewModel.loginPassword = password.toString()
-            }
-            if (mAuth.currentUser != null) {
-                emailEditText.isVisible = false
             }
             loginButton.setOnClickListener {
                 loginProgressBar.isVisible = true

@@ -18,8 +18,10 @@ import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.FragmentAnimeDetailBinding
 import com.example.isthisahangout.models.favourites.FavAnime
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AnimeDetailsFragment : Fragment(R.layout.fragment_anime_detail) {
@@ -27,6 +29,8 @@ class AnimeDetailsFragment : Fragment(R.layout.fragment_anime_detail) {
     private val binding get() = _binding!!
     private val args by navArgs<AnimeDetailsFragmentArgs>()
     private val viewModel by viewModels<FavouritesViewModel>()
+    @Inject
+    lateinit var mAuth: FirebaseAuth
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAnimeDetailBinding.bind(view)
@@ -79,7 +83,7 @@ class AnimeDetailsFragment : Fragment(R.layout.fragment_anime_detail) {
                     FavAnime(
                         title = anime.title,
                         image = anime.imageUrl,
-                        userId = MainActivity.userId!!
+                        userId = mAuth.currentUser!!.uid
                     )
                 )
                 addAnimeToFavButton.isClickable = false

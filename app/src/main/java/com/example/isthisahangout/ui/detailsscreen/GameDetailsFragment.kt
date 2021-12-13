@@ -20,8 +20,10 @@ import com.example.isthisahangout.adapter.ScreenshotAdapter
 import com.example.isthisahangout.databinding.FragmentGameDetailsBinding
 import com.example.isthisahangout.models.favourites.FavGame
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class GameDetailsFragment : Fragment(R.layout.fragment_game_details) {
@@ -29,6 +31,8 @@ class GameDetailsFragment : Fragment(R.layout.fragment_game_details) {
     private val binding get() = _binding!!
     private val args by navArgs<GameDetailsFragmentArgs>()
     private val viewModel by viewModels<FavouritesViewModel>()
+    @Inject
+    lateinit var mAuth: FirebaseAuth
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentGameDetailsBinding.bind(view)
@@ -97,7 +101,7 @@ class GameDetailsFragment : Fragment(R.layout.fragment_game_details) {
                     FavGame(
                         title = game.name!!,
                         image = game.imageUrl!!,
-                        userId = MainActivity.userId!!
+                        userId = mAuth.currentUser!!.uid
                     )
                 )
                 addGameToFavButton.isClickable = false

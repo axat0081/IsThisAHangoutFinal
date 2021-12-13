@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="170dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
         android:adjustViewBounds="true"
         tools:src="@mipmap/ic_launcher" />
 
@@ -25,7 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_below="@id/anime_image_view_big"
-        android:layout_marginEnd="20dp"
         android:background="@drawable/gradient" />
 
     <TextView

@@ -21,15 +21,19 @@ import com.example.isthisahangout.databinding.FragmentDetailDisplayBinding
 import com.example.isthisahangout.models.AnimeGenreResults
 import com.example.isthisahangout.models.favourites.FavAnime
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailDisplayFragment : Fragment(R.layout.fragment_detail_display) {
     private var _binding: FragmentDetailDisplayBinding? = null
     private val binding get() = _binding!!
     private val args by navArgs<DetailDisplayFragmentArgs>()
+    @Inject
+    lateinit var mAuth: FirebaseAuth
     private val viewModel by viewModels<FavouritesViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,7 +83,7 @@ class DetailDisplayFragment : Fragment(R.layout.fragment_detail_display) {
                             id = content.id.toInt(),
                             title = content.title,
                             image = content.imageUrl,
-                            userId = MainActivity.userId!!
+                            userId = mAuth.currentUser!!.uid
                         )
                     )
                 }

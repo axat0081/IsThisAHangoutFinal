@@ -54,9 +54,9 @@ class SongDetailViewModel @Inject constructor(
             }
         } else {
             val comment = Comments(
-                username = MainActivity.username!!,
+                username = MainActivity.userName,
                 text = commentText,
-                pfp = MainActivity.userpfp!!,
+                pfp = MainActivity.userPfp,
                 time = System.currentTimeMillis(),
                 image = if (commentImage == null) null else commentImage.toString(),
                 contentId = song.id

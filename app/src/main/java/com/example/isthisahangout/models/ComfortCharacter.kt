@@ -5,8 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ComfortCharacter(
-    val name: String,
-    val image: String,
-    val from: String,
-    val desc: String
+    val name: String = "",
+    val image: String = "",
+    val from: String = "",
+    val desc: String = "",
+    val priority: Int = 0
 ) : Parcelable

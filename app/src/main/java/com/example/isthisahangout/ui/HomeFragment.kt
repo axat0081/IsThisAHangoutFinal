@@ -7,11 +7,11 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.AiringAnimeAdapter
 import com.example.isthisahangout.adapter.GamesAdapter
@@ -22,6 +22,7 @@ import com.example.isthisahangout.models.AiringAnimeResponse
 import com.example.isthisahangout.models.RoomGames
 import com.example.isthisahangout.models.UpcomingAnimeResponse
 import com.example.isthisahangout.viewmodel.AnimeViewModel
+import com.example.isthisahangout.viewmodel.FirebaseAuthViewModel
 import com.example.isthisahangout.viewmodel.GameViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,9 +40,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), UpcomingAnimeAdapter.OnIt
     val binding get() = _binding!!
     private val animeViewModel by viewModels<AnimeViewModel>()
     private val gamesViewModel by viewModels<GameViewModel>()
+    private val viewModel by activityViewModels<FirebaseAuthViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (MainActivity.userId == null) {
+        if (mAuth.currentUser == null || viewModel.userId.value.length ==0) {
             findNavController()
                 .navigate(
                     HomeFragmentDirections.actionHomeFragment2ToLoginFragment()

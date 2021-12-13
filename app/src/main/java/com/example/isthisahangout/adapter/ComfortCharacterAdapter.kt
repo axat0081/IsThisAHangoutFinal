@@ -4,6 +4,8 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -13,20 +15,26 @@ import com.bumptech.glide.request.target.Target
 import com.example.isthisahangout.R
 import com.example.isthisahangout.databinding.AnimeDisplayLayoutBigBinding
 import com.example.isthisahangout.models.ComfortCharacter
-import com.example.isthisahangout.utils.comfortCharacterQuery
-import com.firebase.ui.database.FirebaseRecyclerAdapter
-import com.firebase.ui.database.FirebaseRecyclerOptions
 
 class ComfortCharacterAdapter(private val listener: OnItemClickListener) :
-    FirebaseRecyclerAdapter<ComfortCharacter, ComfortCharacterAdapter.ComfortCharacterViewHolder>(
-        options
+    ListAdapter<ComfortCharacter, ComfortCharacterAdapter.ComfortCharacterViewHolder>(
+        COMPARATOR
     ) {
 
 
     companion object {
-        val options = FirebaseRecyclerOptions.Builder<ComfortCharacter>()
-            .setQuery(comfortCharacterQuery, ComfortCharacter::class.java)
-            .build()
+        val COMPARATOR = object : DiffUtil.ItemCallback<ComfortCharacter>() {
+            override fun areItemsTheSame(
+                oldItem: ComfortCharacter,
+                newItem: ComfortCharacter
+            ): Boolean = oldItem.name == newItem.name
+
+
+            override fun areContentsTheSame(
+                oldItem: ComfortCharacter,
+                newItem: ComfortCharacter
+            ): Boolean = oldItem == newItem
+        }
     }
 
 
@@ -39,16 +47,14 @@ class ComfortCharacterAdapter(private val listener: OnItemClickListener) :
             )
         )
 
-    override fun onBindViewHolder(
-        holder: ComfortCharacterViewHolder,
-        position: Int,
-        model: ComfortCharacter
-    ) {
+    override fun onBindViewHolder(holder: ComfortCharacterViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
+        if (item != null) {
+            holder.bind(item)
+        }
     }
 
-    interface OnItemClickListener{
+    interface OnItemClickListener {
         fun onItemClick(character: ComfortCharacter)
     }
 
@@ -58,7 +64,7 @@ class ComfortCharacterAdapter(private val listener: OnItemClickListener) :
         init {
             binding.root.setOnClickListener {
                 val position = bindingAdapterPosition
-                if(position!=RecyclerView.NO_POSITION){
+                if (position != RecyclerView.NO_POSITION) {
                     val item = getItem(position)
                     listener.onItemClick(item)
                 }

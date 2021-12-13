@@ -51,7 +51,7 @@ class ChatViewModel @Inject constructor(
                         senderId = userId,
                         text = text,
                         id = docRef.id,
-                        username = MainActivity.username
+                        username = MainActivity.userName
                     )
                 ).addOnFailureListener {
                     viewModelScope.launch {

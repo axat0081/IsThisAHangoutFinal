@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -20,11 +19,8 @@ import com.example.isthisahangout.models.favourites.FavVideo
 import com.example.isthisahangout.pagingsource.VideosPagingSource
 import com.example.isthisahangout.room.favourites.FavouritesDao
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
-import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -99,7 +95,7 @@ class VideoViewModel @Inject constructor(
             viewModelScope.launch {
                 favouritesDao.deleteVideo(
                     id = videoId.value!!,
-                    userId = MainActivity.userId!!
+                    userId = MainActivity.userId
                 )
             }
         } else {
@@ -107,7 +103,7 @@ class VideoViewModel @Inject constructor(
                 favouritesDao.insertVideo(
                     FavVideo(
                         id = video.id!!,
-                        userId = MainActivity.userId!!,
+                        userId = MainActivity.userId,
                         title = video.title,
                         time = video.time,
                         text = video.text,
@@ -128,9 +124,9 @@ class VideoViewModel @Inject constructor(
             }
         } else {
             val comment = Comments(
-                username = MainActivity.username!!,
+                username = MainActivity.userName,
                 text = commentText,
-                pfp = MainActivity.userpfp!!,
+                pfp = MainActivity.userPfp,
                 time = System.currentTimeMillis(),
                 image = if (commentImage == null) null else commentImage.toString(),
                 contentId = video.id
@@ -168,8 +164,8 @@ class VideoViewModel @Inject constructor(
                     title = videoTitle,
                     text = videoText,
                     time = System.currentTimeMillis(),
-                    username = MainActivity.username,
-                    pfp = MainActivity.userpfp,
+                    username = MainActivity.userName,
+                    pfp = MainActivity.userPfp,
                     url = videoUrl.toString(),
                     thumbnail = videoThumbnail.toString()
                 )

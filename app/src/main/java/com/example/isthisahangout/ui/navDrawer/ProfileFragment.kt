@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -15,13 +16,14 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.ComfortCharacterAdapter
 import com.example.isthisahangout.databinding.FragmentProfileBinding
 import com.example.isthisahangout.models.ComfortCharacter
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
+import com.example.isthisahangout.utils.Resource
 import com.example.isthisahangout.viewmodel.FirebaseAuthViewModel
+import com.example.isthisahangout.viewmodel.UserViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -34,13 +36,19 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel by activityViewModels<FirebaseAuthViewModel>()
+    private val userViewModel by activityViewModels<UserViewModel>()
     private lateinit var comfortCharacterAdapter: ComfortCharacterAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentProfileBinding.bind(view)
         comfortCharacterAdapter = ComfortCharacterAdapter(this)
+        userViewModel.userId.value = viewModel.userId.value
         binding.apply {
-            usernameTextView.text = MainActivity.username
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.username.collectLatest { name ->
+                    usernameTextView.text = name
+                }
+            }
             pfpImageview.setOnClickListener {
                 viewModel.imageTag.value = "pfp"
                 findNavController().navigate(
@@ -64,14 +72,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
                 )
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                MainActivity.userPfpObv.collectLatest { pfp ->
+                viewModel.userPfp.collectLatest { pfp ->
                     Glide.with(requireContext())
                         .load(pfp)
                         .into(pfpImageview)
                 }
             }
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                MainActivity.userHeaderObv.collectLatest { header ->
+                viewModel.userHeader.collectLatest { header ->
                     Glide.with(requireContext())
                         .load(header)
                         .listener(object : RequestListener<Drawable> {
@@ -141,6 +149,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
                     }
                 }
             }
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                userViewModel.comfortCharacters.collectLatest { comfortCharacters->
+                    comfortCharactersProgressBar.isVisible = false
+                    comfortCharactersErrorTextView.isVisible = false
+                    comfortCharacterAdapter.submitList(comfortCharacters)
+
+                }
+            }
         }
     }
 
@@ -152,14 +168,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile),
         super.onStart()
         LocalBroadcastManager.getInstance(requireContext())
             .registerReceiver(viewModel.broadcastReceiver, FirebaseUploadService.intentFilter)
-        comfortCharacterAdapter.startListening()
     }
 
     override fun onStop() {
         super.onStop()
         LocalBroadcastManager.getInstance(requireContext())
             .unregisterReceiver(viewModel.broadcastReceiver)
-        comfortCharacterAdapter.stopListening()
     }
 
     override fun onDestroy() {

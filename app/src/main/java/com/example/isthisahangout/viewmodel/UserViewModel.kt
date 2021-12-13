@@ -10,11 +10,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.isthisahangout.models.ComfortCharacter
+import com.example.isthisahangout.repository.UserRepository
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
 import com.google.firebase.database.DatabaseReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -22,8 +23,8 @@ import javax.inject.Named
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val app: Application,
-    @Named("ComfortCharactersRef") private val comfortCharactersRef: DatabaseReference,
-    private val state: SavedStateHandle
+    private val state: SavedStateHandle,
+    private val userRepository: UserRepository
 ) : AndroidViewModel(app) {
 
     var comfortCharacterName = state.get<String>("comfort_character_name")
@@ -50,8 +51,17 @@ class UserViewModel @Inject constructor(
             state.set("comfort_character_desc", comfortCharacterDesc)
         }
 
+    var comfortCharacterPrioirty = state.get<Int>("comfort_character_priority") ?: 0
+        set(value) {
+            field = value
+            state.set("comfort_character_priority", comfortCharacterPrioirty)
+        }
+    val userId = MutableStateFlow("");
     private val databaseEventChannel = Channel<DatabaseEvent>()
     val databaseEventFlow = databaseEventChannel.receiveAsFlow()
+    val comfortCharacters = userId.flatMapLatest { userid ->
+        if (userid.isNotEmpty()) userRepository.getComfortCharacters(userid) else emptyFlow()
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -82,7 +92,8 @@ class UserViewModel @Inject constructor(
                 name = comfortCharacterName!!,
                 desc = comfortCharacterDesc!!,
                 from = comfortCharacterFrom!!,
-                image = comfortCharacterPic.toString()
+                image = comfortCharacterPic.toString(),
+                priority = comfortCharacterPrioirty
             )
             viewModelScope.launch {
                 app.startService(

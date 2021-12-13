@@ -86,8 +86,8 @@ class SongViewModel @Inject constructor(
                 time = System.currentTimeMillis(),
                 title = songTitle,
                 text = songText,
-                pfp = MainActivity.userpfp,
-                username = MainActivity.username,
+                pfp = MainActivity.userPfp,
+                username = MainActivity.userName,
                 thumbnail = songThumbnail.toString(),
                 url = songUrl.toString()
             )

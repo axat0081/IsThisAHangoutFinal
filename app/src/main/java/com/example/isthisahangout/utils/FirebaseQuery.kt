@@ -65,9 +65,3 @@ val songQuery by lazy {
 val newSongQuery by lazy {
     songQuery.whereAfterTimestamp()
 }
-
-val comfortCharacterQuery by lazy {
-    Log.e("ID", MainActivity.userId!!)
-    FirebaseDatabase.getInstance().reference
-        .child("comfortCharacters").child(FirebaseAuth.getInstance().currentUser!!.uid)
-}

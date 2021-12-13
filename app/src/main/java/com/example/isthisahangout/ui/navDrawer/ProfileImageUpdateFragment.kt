@@ -52,13 +52,13 @@ class ProfileImageUpdateFragment : DialogFragment(R.layout.fragment_profile_imag
         binding.apply {
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 if (viewModel.imageTag.value == "pfp") {
-                    MainActivity.userPfpObv.collectLatest { image ->
+                    viewModel.userPfp.collectLatest { image ->
                         Glide.with(requireContext())
                             .load(image)
                             .into(imageview)
                     }
                 } else {
-                    MainActivity.userHeaderObv.collectLatest { image ->
+                    viewModel.userHeader.collectLatest { image ->
                         Glide.with(requireContext())
                             .load(image)
                             .into(imageview)

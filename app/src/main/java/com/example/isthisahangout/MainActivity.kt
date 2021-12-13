@@ -1,6 +1,7 @@
 package com.example.isthisahangout
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -15,9 +16,9 @@ import com.bumptech.glide.Glide
 import com.example.isthisahangout.databinding.ActivityMainBinding
 import com.example.isthisahangout.databinding.NavHeaderBinding
 import com.example.isthisahangout.utils.ConnectionLiveData
+import com.example.isthisahangout.viewmodel.FirebaseAuthViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
@@ -27,16 +28,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var connectionLiveData: ConnectionLiveData
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+    private val viewModel by viewModels<FirebaseAuthViewModel>()
 
     companion object {
-        var username: String? = null
-        var userId: String? = null
-        var userpfp: String? = null
-        var userHeader: String? = null
-        val userNameObv = MutableStateFlow("abc")
-        val userPfpObv = MutableStateFlow("https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75")
-        val userIdObv = MutableStateFlow("abc1")
-        val userHeaderObv = MutableStateFlow("https://firebasestorage.googleapis.com/v0/b/isthisahangout-61d93.appspot.com/o/pfp%2Fpfp_placeholder.jpg?alt=media&token=35fa14c3-6451-41f6-a8be-448a59996f75")
+        var userName: String = "abc"
+        var userPfp: String = "123"
+        var userId: String = "efrvwev"
+        var userHeader: String = "d3ddwfewf"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,15 +66,37 @@ class MainActivity : AppCompatActivity() {
         val headerView = binding.navView.getHeaderView(0)
         val headerBinding = NavHeaderBinding.bind(headerView)
         this.lifecycleScope.launchWhenStarted {
-            userNameObv.collectLatest { name ->
+            viewModel.username.collectLatest { name ->
                 headerBinding.navHeaderUsernameTextView.text = name
             }
         }
         this.lifecycleScope.launchWhenStarted {
-            userPfpObv.collectLatest { image ->
-                Glide.with(applicationContext)
-                    .load(image)
-                    .into(headerBinding.navHeaderPfpImageview)
+            viewModel.userPfp.collectLatest { image ->
+                if (image.isNotBlank()) {
+                    Glide.with(applicationContext)
+                        .load(image)
+                        .into(headerBinding.navHeaderPfpImageview)
+                }
+            }
+        }
+        this.lifecycleScope.launchWhenStarted {
+            viewModel.userId.collectLatest { id ->
+                userId = id
+            }
+        }
+        this.lifecycleScope.launchWhenStarted {
+            viewModel.userPfp.collectLatest { pfp ->
+                userPfp = pfp
+            }
+        }
+        this.lifecycleScope.launchWhenStarted {
+            viewModel.username.collectLatest { name ->
+                userName = name
+            }
+        }
+        this.lifecycleScope.launchWhenStarted {
+            viewModel.userHeader.collectLatest { header ->
+                userHeader = header
             }
         }
         navHostFragment.findNavController()

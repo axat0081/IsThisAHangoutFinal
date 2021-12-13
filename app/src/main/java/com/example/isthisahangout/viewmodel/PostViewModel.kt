@@ -20,13 +20,11 @@ import com.example.isthisahangout.models.favourites.FavPost
 import com.example.isthisahangout.pagingsource.PostsPagingSource
 import com.example.isthisahangout.room.favourites.FavouritesDao
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
-import com.google.firebase.firestore.CollectionReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 const val TITLE_EMPTY = "Please give a post title"
 
@@ -104,7 +102,7 @@ class PostViewModel @Inject constructor(
                         username = post.username,
                         pfp = post.username,
                         time = post.time,
-                        userId = MainActivity.userId!!,
+                        userId = MainActivity.userId,
                         title = post.title!!
                     )
                 )
@@ -113,7 +111,7 @@ class PostViewModel @Inject constructor(
             viewModelScope.launch {
                 favouritesDao.deletePost(
                     id = post.id!!,
-                    userId = MainActivity.userId!!
+                    userId = MainActivity.userId
                 )
             }
         }
@@ -129,9 +127,9 @@ class PostViewModel @Inject constructor(
             }
         } else {
             val comment = Comments(
-                username = MainActivity.username!!,
+                username = MainActivity.userName,
                 text = commentText,
-                pfp = MainActivity.userpfp!!,
+                pfp = MainActivity.userPfp,
                 time = System.currentTimeMillis(),
                 image = if (commentImage == null) null else commentImage.toString(),
                 contentId = post.id
@@ -160,8 +158,8 @@ class PostViewModel @Inject constructor(
                 image = postImage.toString(),
                 likes = 0,
                 time = System.currentTimeMillis(),
-                pfp = MainActivity.userpfp,
-                username = MainActivity.username
+                pfp = MainActivity.userPfp,
+                username = MainActivity.userName
             )
         app.startService(
             Intent(app, FirebaseUploadService::class.java)

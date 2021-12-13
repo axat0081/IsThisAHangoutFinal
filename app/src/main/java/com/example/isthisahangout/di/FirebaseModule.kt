@@ -24,15 +24,9 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    @Named("UserRef")
-    fun providesUserRef(): DatabaseReference =
-        FirebaseDatabase.getInstance().reference.child("Users")
-
-    @Provides
-    @Singleton
-    @Named("ComfortCharactersRef")
-    fun providesComfortCharacterRef(): DatabaseReference =
-        FirebaseDatabase.getInstance().reference.child("comfortCharacters")
+    @Named("UserDataRef")
+    fun providesFirebaseRDUserRef(): DatabaseReference = FirebaseDatabase.getInstance().getReference()
+        .child("Users")
 
     @Provides
     @Singleton
@@ -112,4 +106,16 @@ object FirebaseModule {
     @Named("CommentsRef")
     fun providedCommentsRef(): CollectionReference =
         FirebaseFirestore.getInstance().collection("Comments")
+
+    @Provides
+    @Singleton
+    @Named("ComfortCharacterRef")
+    fun providesComfortCharacterRef(): CollectionReference =
+        FirebaseFirestore.getInstance().collection("ComfortCharacters")
+
+    @Provides
+    @Singleton
+    @Named("UserRef")
+    fun providesUserRef(): CollectionReference =
+        FirebaseFirestore.getInstance().collection("Users")
 }
