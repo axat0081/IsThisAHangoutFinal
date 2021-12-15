@@ -2,6 +2,7 @@ package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -22,17 +23,22 @@ import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.CommentsAdapter
 import com.example.isthisahangout.databinding.FragmentVideoDetailsBinding
 import com.example.isthisahangout.models.Comments
+import com.example.isthisahangout.utils.VideoCache
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
 import com.example.isthisahangout.viewmodel.PlayVideoViewModel
 import com.example.isthisahangout.viewmodel.VideoViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.database.ExoDatabaseProvider
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
+import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
-import com.norulab.exofullscreen.setSource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import java.io.File
 import java.lang.Integer.min
 import java.text.DateFormat
 import javax.inject.Inject
@@ -99,10 +105,14 @@ class VideoDetailsFragment : Fragment(R.layout.fragment_video_details) {
                 playVideoViewModel.simpleExoPlayer =
                     SimpleExoPlayer.Builder(requireActivity().applicationContext).build()
                 playerView.player = playVideoViewModel.simpleExoPlayer
-                playVideoViewModel.simpleExoPlayer!!.setSource(
-                    requireActivity().applicationContext,
-                    video.url!!
-                )
+                val mediaSource = ProgressiveMediaSource.Factory(
+                    VideoCache(
+                        requireContext(),
+                        100 * 1024 * 1024,
+                        10 * 1024 * 1024
+                    )
+                ).createMediaSource(Uri.parse(video.url!!))
+                playVideoViewModel.simpleExoPlayer!!.prepare(mediaSource)
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {

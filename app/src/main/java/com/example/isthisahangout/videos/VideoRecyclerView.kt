@@ -4,20 +4,24 @@ package com.example.isthisahangout.videos
 import android.content.Context
 import android.graphics.Point
 import android.net.Uri
+import android.util.Log
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestManager
 import com.example.isthisahangout.R
+import com.example.isthisahangout.models.FirebaseVideo
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
@@ -26,12 +30,13 @@ import com.google.android.exoplayer2.util.Util
 import java.util.*
 
 
-/*
 class VideoRecyclerView(context: Context) : RecyclerView(context) {
     private enum class VolumeState {
         ON,
         OFF
     }
+
+    private val TAG = "video"
 
     // ui
     private var thumbnail: ImageView? = null  // ui
@@ -43,7 +48,7 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
     private var videoPlayer: SimpleExoPlayer? = null
 
     // vars
-    private val mediaObjects: ArrayList<Video> = ArrayList<Video>()
+    private var mediaObjects: ArrayList<FirebaseVideo> = ArrayList<FirebaseVideo>()
     private var videoSurfaceDefaultHeight = 0
     private var screenDefaultHeight = 0
     private var playPosition = -1
@@ -55,6 +60,8 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
     init {
         init()
     }
+
+    private val videoViewClickListener = OnClickListener { toggleVolume() }
 
 
     private fun init() {
@@ -74,14 +81,39 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == SCROLL_STATE_IDLE) {
-                    if (thumbnail != null) {
-                        thumbnail!!.visibility = VISIBLE;
-                    }
+                    thumbnail?.visibility = VISIBLE;
                     if (!recyclerView.canScrollVertically(1)) {
-                        playVideo(true);
+                        playVideo(true)
                     } else {
-                        playVideo(false);
+                        playVideo(false)
                     }
+                }
+            }
+        })
+        addOnChildAttachStateChangeListener(object : OnChildAttachStateChangeListener {
+            override fun onChildViewAttachedToWindow(view: View) {
+
+            }
+
+            override fun onChildViewDetachedFromWindow(view: View) {
+                if (viewHolderParent != null && viewHolderParent!! == view) {
+                    resetVideoView()
+                }
+            }
+        })
+        videoPlayer!!.addListener(object : Player.EventListener {
+            override fun onPlaybackStateChanged(state: Int) {
+                super.onPlaybackStateChanged(state)
+                when (state) {
+                    Player.STATE_BUFFERING -> progressBar?.isVisible = true
+                    Player.STATE_ENDED -> videoPlayer!!.seekTo(0)
+                    Player.STATE_READY -> {
+                        progressBar?.isVisible = false
+                        if (!isVideoViewAdded) {
+                            addVideoView()
+                        }
+                    }
+                    else -> Unit
                 }
             }
         })
@@ -135,14 +167,15 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
         val currentPosition =
             targetPosition - (layoutManager as LinearLayoutManager?)!!.findFirstVisibleItemPosition()
         val child = getChildAt(currentPosition) ?: return
-        val holder: VideosAdapter.VideoPlayerViewHolder = child.tag as VideosAdapter.VideoPlayerViewHolder
+        val holder: VideosAdapter.VideoPlayerViewHolder =
+            child.tag as VideosAdapter.VideoPlayerViewHolder
         if (holder == null) {
             playPosition = -1
             return
         }
-        thumbnail = holder.thumbnail
-        progressBar = holder.progressBar
-        volumeControl = holder.volumeControl
+        thumbnail = holder.binding.thumbnail
+        progressBar = holder.binding.progressBar
+        volumeControl = holder.binding.volumeControl
         viewHolderParent = holder.itemView
         frameLayout = holder.itemView.findViewById(R.id.media_container)
         videoSurfaceView!!.player = videoPlayer
@@ -150,23 +183,11 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
             context, Util.getUserAgent(context, "RecyclerView VideoPlayer")
         )
-        val mediaUrl: String = mediaObjects[targetPosition].getMedia_url()
-        if (mediaUrl != null) {
-            val videoSource: MediaSource = ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(mediaUrl))
-            videoPlayer!!.prepare(videoSource)
-            videoPlayer!!.playWhenReady = true
-        }
-    }
-
-    private fun removeVideoView(videoView: PlayerView) {
-        val parent = videoView.parent as ViewGroup ?: return
-        val index = parent.indexOfChild(videoView)
-        if (index >= 0) {
-            parent.removeViewAt(index)
-            isVideoViewAdded = false
-            viewHolderParent!!.setOnClickListener(null)
-        }
+        val mediaUrl: String = mediaObjects[targetPosition].url!!
+        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(Uri.parse(mediaUrl))
+        videoPlayer!!.prepare(videoSource)
+        videoPlayer!!.playWhenReady = true
     }
 
     private fun setVolumeControl(state: VolumeState) {
@@ -194,19 +215,63 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
     }
 
 
+    // Remove the old player
+    private fun removeVideoView(videoView: PlayerView) {
+        val parent = videoView.parent as ViewGroup
+        val index = parent.indexOfChild(videoView)
+        if (index >= 0) {
+            parent.removeViewAt(index)
+            isVideoViewAdded = false
+            viewHolderParent!!.setOnClickListener(null)
+        }
+    }
+
+    private fun addVideoView() {
+        frameLayout!!.addView(videoSurfaceView)
+        isVideoViewAdded = true
+        videoSurfaceView!!.requestFocus()
+        videoSurfaceView!!.visibility = VISIBLE
+        videoSurfaceView!!.alpha = 1f
+        thumbnail!!.visibility = GONE
+    }
+
+    private fun resetVideoView() {
+        if (isVideoViewAdded) {
+            removeVideoView(videoSurfaceView!!)
+            playPosition = -1
+            videoSurfaceView!!.visibility = INVISIBLE
+            thumbnail!!.visibility = VISIBLE
+        }
+    }
+
+    fun releasePlayer() {
+        if (videoPlayer != null) {
+            videoPlayer!!.release()
+            videoPlayer = null
+        }
+        viewHolderParent = null
+    }
+
+    private fun toggleVolume() {
+        if (videoPlayer != null) {
+            if (volumeState === VolumeState.OFF) {
+                Log.d(TAG, "togglePlaybackState: enabling volume.")
+                setVolumeControl(VolumeState.ON)
+            } else if (volumeState === VolumeState.ON) {
+                Log.d(TAG, "togglePlaybackState: disabling volume.")
+                setVolumeControl(VolumeState.OFF)
+            }
+        }
+    }
+
+
     private fun animateVolumeControl() {
         if (volumeControl != null) {
             volumeControl!!.bringToFront()
             if (volumeState === VolumeState.OFF) {
-                Glide.with(context)
-                    .load(R.drawable.ic_volume_off_grey_24dp)
-                    .into(volumeControl!!)
-
+                volumeControl!!.setImageResource(R.drawable.ic_volume_off_grey_24dp)
             } else if (volumeState === VolumeState.ON) {
-                Glide.with(context)
-                    .load(R.drawable.ic_volume_up_grey_24dp)
-                    .into(volumeControl!!)
-
+                volumeControl!!.setImageResource(R.drawable.ic_volume_up_grey_24dp)
             }
             volumeControl!!.animate().cancel()
             volumeControl!!.alpha = 1f
@@ -215,5 +280,11 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
                 .setDuration(600).startDelay = 1000
         }
     }
+
+    fun setMediaObjects(mediaObjects: ArrayList<FirebaseVideo>) {
+        this.mediaObjects = mediaObjects
+    }
+
+
 }
-*/
+
