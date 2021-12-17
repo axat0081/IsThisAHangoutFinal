@@ -217,7 +217,7 @@ class VideoRecyclerView(context: Context) : RecyclerView(context) {
 
     // Remove the old player
     private fun removeVideoView(videoView: PlayerView) {
-        val parent = videoView.parent as ViewGroup
+        val parent= videoView.parent as ViewGroup
         val index = parent.indexOfChild(videoView)
         if (index >= 0) {
             parent.removeViewAt(index)

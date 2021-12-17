@@ -19,6 +19,7 @@ import com.example.isthisahangout.models.FirebaseVideo
 
 class VideosPagingAdapter(private val listener: OnItemClickListener) :
     PagingDataAdapter<FirebaseVideo, VideosPagingAdapter.VideosViewHolder>(COMPARATOR) {
+    lateinit var viewHolder: VideosViewHolder
 
     companion object {
         val COMPARATOR = object : DiffUtil.ItemCallback<FirebaseVideo>() {
@@ -33,10 +34,13 @@ class VideosPagingAdapter(private val listener: OnItemClickListener) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideosViewHolder =
-        VideosViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideosViewHolder {
+        viewHolder = VideosViewHolder(
             VideoDisplayLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
+        return viewHolder
+    }
+
 
     override fun onBindViewHolder(holder: VideosViewHolder, position: Int) {
         val item = getItem(position)
@@ -49,7 +53,7 @@ class VideosPagingAdapter(private val listener: OnItemClickListener) :
         fun onItemClick(video: FirebaseVideo)
     }
 
-    inner class VideosViewHolder(private val binding: VideoDisplayLayoutBinding) :
+    inner class VideosViewHolder(val binding: VideoDisplayLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
