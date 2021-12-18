@@ -11,16 +11,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.isthisahangout.models.User
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
+import com.example.isthisahangout.utils.PreferencesManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.CollectionReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +31,8 @@ class FirebaseAuthViewModel @Inject constructor(
     val state: SavedStateHandle,
     private val mAuth: FirebaseAuth,
     @Named("UserDataRef") private val userRef: DatabaseReference,
-    @Named("UserRef") private val userCollectionRef: CollectionReference
+    @Named("UserRef") private val userCollectionRef: CollectionReference,
+    private val preferencesManager: PreferencesManager
 ) : AndroidViewModel(app) {
 
     companion object {
@@ -55,6 +55,19 @@ class FirebaseAuthViewModel @Inject constructor(
 
     private val _userHeader = MutableStateFlow("")
     val userHeader: StateFlow<String> = _userHeader
+
+    private val userDataFlow = preferencesManager.userData
+
+    init {
+        viewModelScope.launch {
+            userDataFlow.collectLatest { profile ->
+                _userId.value = profile.userId
+                _username.value = profile.username
+                _userPfp.value = profile.pfp
+                _userHeader.value = profile.header
+            }
+        }
+    }
 
     var loginEmail = state.get<String>("loginEmail") ?: ""
         set(value) {
@@ -106,6 +119,24 @@ class FirebaseAuthViewModel @Inject constructor(
     val registrationFlow = authChannel.receiveAsFlow()
     val profileFlow = authChannel.receiveAsFlow()
     val imageTag = MutableStateFlow("pfp")
+
+    fun updateUserData() {
+        if (userId.value != mAuth.currentUser!!.uid) {
+            userCollectionRef.document(mAuth.currentUser!!.uid)
+                .get().addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val snapshot = it.result!!
+                        viewModelScope.launch {
+                            preferencesManager.updateUserId(mAuth.currentUser!!.uid)
+                            preferencesManager.updateUserName(snapshot.getString("userName")!!)
+                            preferencesManager.updateUserPfp(snapshot.getString("pfp")!!)
+                            preferencesManager.updateUserHeader(snapshot.getString("header")!!)
+                        }
+                    }
+                }
+        }
+    }
+
     fun onLoginClick() {
         if (loginPassword.isBlank()) {
             viewModelScope.launch {
@@ -114,102 +145,46 @@ class FirebaseAuthViewModel @Inject constructor(
             return
         }
         if (loginEmail.isBlank()) {
-            if (mAuth.currentUser == null) {
-                viewModelScope.launch {
-                    authChannel.send(AuthEvent.LoginFailure("Email cannot be empty"))
-                }
-            } else {
-                userRef.child(mAuth.currentUser!!.uid).child("email")
-                    .addValueEventListener(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            loginEmail = snapshot.value.toString()
-                            mAuth.signInWithEmailAndPassword(loginEmail, loginPassword)
-                                .addOnCompleteListener { login ->
-                                    if (login.isSuccessful) {
-                                        userRef.child(mAuth.currentUser!!.uid)
-                                            .addValueEventListener(object : ValueEventListener {
-                                                override fun onDataChange(snapshot: DataSnapshot) {
-                                                    _userId.value = mAuth.currentUser!!.uid
-                                                    _username.value =
-                                                        snapshot.child("userName").value.toString()
-                                                    _userPfp.value =
-                                                        snapshot.child("pfp").value.toString()
-                                                    _userHeader.value =
-                                                        snapshot.child("header").value.toString()
-                                                    viewModelScope.launch {
-                                                        authChannel.send(
-                                                            AuthEvent.LoginSuccess(
-                                                                LOGIN
-                                                            )
-                                                        )
-                                                    }
-                                                }
-
-                                                override fun onCancelled(error: DatabaseError) {
-                                                    mAuth.signOut()
-                                                    viewModelScope.launch {
-                                                        authChannel.send(
-                                                            AuthEvent.LoginFailure(
-                                                                error.message
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                            })
-                                    } else {
-                                        viewModelScope.launch {
-                                            authChannel.send(AuthEvent.LoginFailure(login.exception.toString()))
-                                        }
-                                    }
-                                }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            viewModelScope.launch {
-                                authChannel.send(AuthEvent.LoginFailure(error.message))
-                            }
-                        }
-                    })
+            viewModelScope.launch {
+                authChannel.send(AuthEvent.LoginFailure("Email cannot be empty"))
             }
             return
         }
         mAuth.signInWithEmailAndPassword(loginEmail, loginPassword)
             .addOnCompleteListener { login ->
                 if (login.isSuccessful) {
-                    userCollectionRef.document(mAuth.currentUser!!.uid)
-                        .get().addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                val snapshot = it.result
-                                _userId.value = mAuth.currentUser!!.uid
-                                _username.value = snapshot?.getString("userName") ?: ""
-                                _userPfp.value = snapshot?.getString("pfp") ?: ""
-                                _userHeader.value = snapshot?.getString("header") ?: ""
-                                viewModelScope.launch {
-                                    authChannel.send(
-                                        AuthEvent.LoginSuccess(
-                                            LOGIN
-                                        )
-                                    )
-                                }
-                            } else {
-                                mAuth.signOut()
-                                var msg = "An error occurred"
-                                if (it.exception != null) {
-                                    msg = it.exception!!.localizedMessage ?: "An error occurred"
-                                }
-                                Log.e("Error", "Hey1")
-                                viewModelScope.launch {
-                                    authChannel.send(
-                                        AuthEvent.LoginFailure(
-                                            msg
-                                        )
-                                    )
+                    if (userId.value == mAuth.currentUser!!.uid) {
+                        viewModelScope.launch {
+                            authChannel.send(AuthEvent.LoginSuccess(LOGIN))
+                        }
+                    } else {
+                        userCollectionRef.document(mAuth.currentUser!!.uid)
+                            .get().addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    val snapshot = it.result!!
+                                    viewModelScope.launch {
+                                        preferencesManager.updateUserId(mAuth.currentUser!!.uid)
+                                        preferencesManager.updateUserName(snapshot.getString("userName")!!)
+                                        preferencesManager.updateUserPfp(snapshot.getString("pfp")!!)
+                                        preferencesManager.updateUserHeader(snapshot.getString("header")!!)
+                                    }
+                                    viewModelScope.launch {
+                                        authChannel.send(AuthEvent.LoginSuccess(LOGIN))
+                                    }
+                                } else {
+                                    mAuth.signOut()
+                                    var msg = "An error occurred"
+                                    if (it.exception != null) {
+                                        msg = it.exception!!.localizedMessage ?: "An error occurred"
+                                    }
+                                    viewModelScope.launch {
+                                        authChannel.send(AuthEvent.LoginFailure(msg))
+                                    }
                                 }
                             }
-                        }
+                    }
                 } else {
                     viewModelScope.launch {
-                        Log.e("Error", "Hey2")
                         authChannel.send(AuthEvent.LoginFailure(login.exception.toString()))
                     }
                 }
@@ -242,11 +217,13 @@ class FirebaseAuthViewModel @Inject constructor(
                                 header = DEFAULTHEADER
                             )
                         ).addOnCompleteListener { task ->
-
                             if (task.isSuccessful) {
-                                _username.value = registrationUsername
-                                _userPfp.value = DEFAULTPFP
-                                _userId.value = mAuth.currentUser!!.uid
+                                viewModelScope.launch {
+                                    preferencesManager.updateUserId(mAuth.currentUser!!.uid)
+                                    preferencesManager.updateUserName(registrationUsername)
+                                    preferencesManager.updateUserPfp(DEFAULTPFP)
+                                    preferencesManager.updateUserHeader(DEFAULTHEADER)
+                                }
                                 viewModelScope.launch {
                                     authChannel.send(AuthEvent.RegistrationSuccess(REGISTER))
                                 }
@@ -308,7 +285,7 @@ class FirebaseAuthViewModel @Inject constructor(
                 authChannel.send(AuthEvent.UpdateProfileFailure("Image could not be updated"))
             } else {
                 authChannel.send(AuthEvent.UpdateProfileSuccess("Image updates", profilePfp!!))
-                _userPfp.value = profilePfp.toString()
+                preferencesManager.updateUserPfp(profilePfp.toString())
             }
         }
     }
@@ -320,7 +297,7 @@ class FirebaseAuthViewModel @Inject constructor(
                 authChannel.send(AuthEvent.UpdateProfileFailure("Image could not be updated"))
             } else {
                 authChannel.send(AuthEvent.UpdateProfileSuccess("Image updates", profileHeader!!))
-                _userHeader.value = profileHeader.toString()
+                preferencesManager.updateUserHeader(profileHeader.toString())
             }
         }
     }

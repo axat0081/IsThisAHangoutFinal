@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.isthisahangout.R
@@ -43,12 +44,18 @@ class HomeFragment : Fragment(R.layout.fragment_home), UpcomingAnimeAdapter.OnIt
     private val viewModel by activityViewModels<FirebaseAuthViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (mAuth.currentUser == null || viewModel.userId.value.length ==0) {
+        if (mAuth.currentUser == null) {
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.homeFragment2, true)
+                .build()
             findNavController()
                 .navigate(
-                    HomeFragmentDirections.actionHomeFragment2ToLoginFragment()
+                    HomeFragmentDirections.actionHomeFragment2ToLoginFragment(),
+                    navOptions
                 )
             return
+        } else {
+            viewModel.updateUserData()
         }
         _binding = FragmentHomeBinding.bind(view)
         val upcomingAnimeAdapter = UpcomingAnimeAdapter(this)
