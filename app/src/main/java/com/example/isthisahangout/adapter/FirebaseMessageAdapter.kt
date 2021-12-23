@@ -5,16 +5,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.databinding.MessagesDisplayLayoutBinding
 import com.example.isthisahangout.models.FirebaseMessage
+import com.example.isthisahangout.utils.firebaseAuth
 import com.example.isthisahangout.utils.newMessagesQuery
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
-import javax.inject.Inject
 
 fun Query.whereAfterTimestamp(): Query =
     whereGreaterThan("time", Timestamp.now())
@@ -23,9 +21,6 @@ class FirebaseMessageAdapter :
     FirestoreRecyclerAdapter<FirebaseMessage, FirebaseMessageAdapter.FirebaseMessageViewHolder>(
         options
     ) {
-
-    @Inject
-    lateinit var mAuth: FirebaseAuth
 
     companion object {
         var options: FirestoreRecyclerOptions<FirebaseMessage> =
@@ -58,7 +53,7 @@ class FirebaseMessageAdapter :
         @SuppressLint("SetTextI18n")
         fun bind(message: FirebaseMessage) {
             binding.apply {
-                if (message.senderId == mAuth.currentUser!!.uid) {
+                if (message.senderId == firebaseAuth.currentUser!!.uid) {
                     linearLayout1.isVisible = false
                     sentByTextView.text = message.username
                     sentByTextView.paint.isUnderlineText = true
