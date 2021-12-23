@@ -2,6 +2,7 @@ package com.example.isthisahangout.pagingsource
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.example.isthisahangout.models.FirebaseMessage
 import com.example.isthisahangout.utils.messagesQuery
 import com.google.firebase.firestore.QuerySnapshot
@@ -24,5 +25,9 @@ class MessagesPagingSource :
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<QuerySnapshot, FirebaseMessage>): QuerySnapshot? {
+        return null
     }
 }

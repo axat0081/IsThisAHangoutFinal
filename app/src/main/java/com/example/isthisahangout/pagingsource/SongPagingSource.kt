@@ -2,6 +2,7 @@ package com.example.isthisahangout.pagingsource
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.example.isthisahangout.models.Song
 import com.example.isthisahangout.utils.songQuery
 import com.example.isthisahangout.utils.videoQuery
@@ -23,5 +24,9 @@ class SongPagingSource : PagingSource<QuerySnapshot, Song>() {
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<QuerySnapshot, Song>): QuerySnapshot? {
+        return null
     }
 }
