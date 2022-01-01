@@ -2,6 +2,7 @@ package com.example.isthisahangout.pagingsource
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.example.isthisahangout.models.FirebaseVideo
 import com.example.isthisahangout.utils.videoQuery
 import com.google.firebase.firestore.QuerySnapshot
@@ -23,5 +24,9 @@ class VideosPagingSource : PagingSource<QuerySnapshot, FirebaseVideo>() {
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<QuerySnapshot, FirebaseVideo>): QuerySnapshot? {
+        return null
     }
 }
