@@ -9,15 +9,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.isthisahangout.databinding.MessagesDisplayLayoutBinding
 import com.example.isthisahangout.models.FirebaseMessage
-import com.google.firebase.auth.FirebaseAuth
-import javax.inject.Inject
+import com.example.isthisahangout.utils.firebaseAuth
 
 class MessagesPagingAdapter :
     PagingDataAdapter<FirebaseMessage, MessagesPagingAdapter.MessagesPagedViewHolder>(COMPARATOR) {
-
-
-    @Inject
-    lateinit var mAuth: FirebaseAuth
 
     companion object {
         val COMPARATOR = object : DiffUtil.ItemCallback<FirebaseMessage>() {
@@ -45,7 +40,7 @@ class MessagesPagingAdapter :
         @SuppressLint("SetTextI18n")
         fun bind(message: FirebaseMessage) {
             binding.apply {
-                if (message.senderId == mAuth.currentUser!!.uid) {
+                if (message.senderId == firebaseAuth.currentUser!!.uid) {
                     linearLayout1.isVisible = false
                     sentByTextView.text = message.username
                     messageSentTextView.text =

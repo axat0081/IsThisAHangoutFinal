@@ -16,12 +16,17 @@ import androidx.paging.cachedIn
 import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.models.FirebasePost
+import com.example.isthisahangout.models.LikedPostId
 import com.example.isthisahangout.models.favourites.FavPost
 import com.example.isthisahangout.pagingsource.PostsPagingSource
 import com.example.isthisahangout.room.favourites.FavouritesDao
+import com.example.isthisahangout.room.posts.PostsDao
 import com.example.isthisahangout.service.uploadService.FirebaseUploadService
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +37,9 @@ const val TITLE_EMPTY = "Please give a post title"
 class PostViewModel @Inject constructor(
     private val app: Application,
     private val state: SavedStateHandle,
-    private val favouritesDao: FavouritesDao
+    private val favouritesDao: FavouritesDao,
+    private val postsDao: PostsDao,
+    private val mAuth: FirebaseAuth
 ) : AndroidViewModel(app) {
 
     private val postChannel = Channel<PostsEvent>()
@@ -44,14 +51,6 @@ class PostViewModel @Inject constructor(
             field = value
             state.set("post_title", postTitle)
         }
-
-
-    var isLiked = state.get<Boolean>("is_liked") ?: false
-        set(value) {
-            field = value
-            state.set("is_liked", isLiked)
-        }
-
 
     var postText = state.get<String>("post_text") ?: ""
         set(value) {
@@ -77,6 +76,14 @@ class PostViewModel @Inject constructor(
             state.set("comment_image", commentImage)
         }
 
+
+    val currentPostId = MutableStateFlow("abc")
+
+    val isLiked = MutableStateFlow(false)
+
+    val likedPost = currentPostId.flatMapLatest { postId ->
+        postsDao.getLikesPostsId(mAuth.uid!!, postId)
+    }
 
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -118,6 +125,19 @@ class PostViewModel @Inject constructor(
     }
 
     fun onLikeClick(post: FirebasePost) {
+        viewModelScope.launch {
+            if (isLiked.value) {
+                postsDao.deleteLikedPostId(mAuth.uid!!, post.id!!)
+            } else {
+                postsDao.insertLikedPostId(
+                    LikedPostId(
+                        postId = post.id!!,
+                        userId = mAuth.uid!!
+                    )
+                )
+            }
+            isLiked.value = !isLiked.value
+        }
     }
 
     fun onCommentSendClick(post: FirebasePost) {

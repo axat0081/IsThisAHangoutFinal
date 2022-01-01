@@ -3,6 +3,8 @@ package com.example.isthisahangout.di
 import android.app.Application
 import androidx.room.Room
 import com.example.isthisahangout.room.anime.*
+import com.example.isthisahangout.room.chat.ChatDao
+import com.example.isthisahangout.room.chat.ChatDatabase
 import com.example.isthisahangout.room.favourites.FavouritesDao
 import com.example.isthisahangout.room.favourites.FavouritesDatabase
 import com.example.isthisahangout.room.games.GameDatabase
@@ -138,4 +140,18 @@ object RoomModule {
     @Provides
     @Singleton
     fun providesPFavDoa(db: FavouritesDatabase): FavouritesDao = db.getFavouritesDao()
+
+
+    ///Chat
+    @Provides
+    @Singleton
+    fun providesChatDatabase(app: Application): ChatDatabase =
+        Room.databaseBuilder(app, ChatDatabase::class.java, "chat_database")
+            .fallbackToDestructiveMigration()
+            .build()
+
+    @Provides
+    @Singleton
+    fun providesChatDao(db: ChatDatabase): ChatDao = db.getMessagesDao()
+
 }

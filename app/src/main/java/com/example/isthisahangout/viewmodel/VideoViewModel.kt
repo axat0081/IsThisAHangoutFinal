@@ -83,7 +83,6 @@ class VideoViewModel @Inject constructor(
     val videos = Pager(PagingConfig(10)) {
         VideosPagingSource()
     }.flow.cachedIn(viewModelScope)
-    val videoPlayList = ArrayList<FirebaseVideo>()
 
     fun onShowDetailsClick() {
         showDetails.value = !showDetails.value!!

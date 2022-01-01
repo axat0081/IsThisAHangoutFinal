@@ -31,38 +31,38 @@ class PreferencesManager @Inject constructor(
     val userData = context.dataStore.data
         .map { profile ->
             ProfileData(
-                userId = profile[userDataKeys.USERID] ?: "abc",
-                username = profile[userDataKeys.USERNAME] ?: "default name",
-                pfp = profile[userDataKeys.PFP] ?: DEFAULT_PFP,
-                header = profile[userDataKeys.HEADER] ?: DEFAULT_HEADER
+                userId = profile[UserDataKeys.USERID] ?: "abc",
+                username = profile[UserDataKeys.USERNAME] ?: "default name",
+                pfp = profile[UserDataKeys.PFP] ?: DEFAULT_PFP,
+                header = profile[UserDataKeys.HEADER] ?: DEFAULT_HEADER
             )
         }
 
     suspend fun updateUserId(userId: String) {
         context.dataStore.edit { profile ->
-            profile[userDataKeys.USERID] = userId
+            profile[UserDataKeys.USERID] = userId
         }
     }
 
     suspend fun updateUserName(username: String) {
         context.dataStore.edit { profile ->
-            profile[userDataKeys.USERNAME] = username
+            profile[UserDataKeys.USERNAME] = username
         }
     }
 
     suspend fun updateUserPfp(pfp: String) {
         context.dataStore.edit { profile ->
-            profile[userDataKeys.PFP] = pfp
+            profile[UserDataKeys.PFP] = pfp
         }
     }
 
     suspend fun updateUserHeader(header: String) {
         context.dataStore.edit { profile ->
-            profile[userDataKeys.HEADER] = header
+            profile[UserDataKeys.HEADER] = header
         }
     }
 
-    private object userDataKeys {
+    private object UserDataKeys {
         val USERID = stringPreferencesKey("user_id")
         val USERNAME = stringPreferencesKey("username")
         val PFP = stringPreferencesKey("pfp")

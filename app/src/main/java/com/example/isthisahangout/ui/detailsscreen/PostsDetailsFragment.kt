@@ -2,12 +2,10 @@ package com.example.isthisahangout.ui.detailsscreen
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -23,13 +21,11 @@ import com.bumptech.glide.request.target.Target
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.R
 import com.example.isthisahangout.adapter.CommentsAdapter
 import com.example.isthisahangout.databinding.FragmentPostDetailsBinding
 import com.example.isthisahangout.models.Comments
 import com.example.isthisahangout.models.FirebasePost
-import com.example.isthisahangout.models.favourites.FavPost
 import com.example.isthisahangout.viewmodel.FavouritesViewModel
 import com.example.isthisahangout.viewmodel.PostViewModel
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
@@ -38,6 +34,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import java.text.DateFormat
 import javax.inject.Inject
 import javax.inject.Named
@@ -50,6 +47,7 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
     private val viewModel by viewModels<PostViewModel>()
     private val favViewModel by viewModels<FavouritesViewModel>()
     private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
+
     @Inject
     @Named("CommentsRef")
     lateinit var commentsRef: CollectionReference
@@ -86,6 +84,7 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
             }
         }
         binding.apply {
+            viewModel.currentPostId.value = post.id
             addCommentImageView.isVisible = false
             bookmarkImageView.setImageResource(R.drawable.bookmark)
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -99,8 +98,8 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 }
             }
 
-            viewModel.isBookMarked.observe(viewLifecycleOwner){isBookmarked->
-                if(isBookmarked){
+            viewModel.isBookMarked.observe(viewLifecycleOwner) { isBookmarked ->
+                if (isBookmarked) {
                     bookmarkImageView.setImageResource(R.drawable.bookmarked)
                 } else {
                     bookmarkImageView.setImageResource(R.drawable.bookmark)
@@ -183,6 +182,17 @@ class PostsDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 viewModel.onCommentSendClick(post)
                 commentEditText.text.clear()
                 addCommentImageView.isVisible = false
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.likedPost.collectLatest { post ->
+                    viewModel.isLiked.value = post != null
+                }
+            }
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.isLiked.collectLatest { isLiked ->
+                    likeButton.isLiked = isLiked
+                }
             }
         }
     }

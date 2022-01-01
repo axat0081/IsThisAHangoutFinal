@@ -17,14 +17,8 @@ val chatCollectionReference by lazy {
 
 val messagesQuery by lazy {
     chatCollectionReference
-        .orderBy("time", Query.Direction.DESCENDING)
+        .orderBy("time",Query.Direction.DESCENDING)
         .whereLessThan("time", Timestamp.now())
-}
-
-val newMessagesQuery by lazy {
-    chatCollectionReference
-        .orderBy("time", Query.Direction.DESCENDING)
-        .whereAfterTimestamp()
 }
 
 val postCollectionReference by lazy {
@@ -64,4 +58,8 @@ val songQuery by lazy {
 
 val newSongQuery by lazy {
     songQuery.whereAfterTimestamp()
+}
+
+val firebaseAuth by lazy {
+    FirebaseAuth.getInstance()
 }

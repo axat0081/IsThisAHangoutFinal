@@ -4,37 +4,31 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.isthisahangout.MainActivity
 import com.example.isthisahangout.databinding.MessagesDisplayLayoutBinding
 import com.example.isthisahangout.models.FirebaseMessage
-import com.example.isthisahangout.utils.newMessagesQuery
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
-import javax.inject.Inject
 
 fun Query.whereAfterTimestamp(): Query =
     whereGreaterThan("time", Timestamp.now())
 
 class FirebaseMessageAdapter :
-    FirestoreRecyclerAdapter<FirebaseMessage, FirebaseMessageAdapter.FirebaseMessageViewHolder>(
-        options
-    ) {
+    ListAdapter<FirebaseMessage, FirebaseMessageAdapter.FirebaseMessageViewHolder>(COMPARATOR) {
 
-    @Inject
-    lateinit var mAuth: FirebaseAuth
+    private var mAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
     companion object {
-        var options: FirestoreRecyclerOptions<FirebaseMessage> =
-            FirestoreRecyclerOptions.Builder<FirebaseMessage>()
-                .setQuery(
-                    newMessagesQuery,
-                    FirebaseMessage::class.java
-                )
-                .build()
+        val COMPARATOR = object : DiffUtil.ItemCallback<FirebaseMessage>() {
+            override fun areItemsTheSame(oldItem: FirebaseMessage, newItem: FirebaseMessage) =
+                oldItem == newItem
+
+            override fun areContentsTheSame(oldItem: FirebaseMessage, newItem: FirebaseMessage) =
+                oldItem == newItem
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FirebaseMessageViewHolder =
@@ -46,11 +40,12 @@ class FirebaseMessageAdapter :
 
     override fun onBindViewHolder(
         holder: FirebaseMessageViewHolder,
-        position: Int,
-        model: FirebaseMessage
+        position: Int
     ) {
         val item = getItem(position)
-        holder.bind(item)
+        if (item != null) {
+            holder.bind(item)
+        }
     }
 
     inner class FirebaseMessageViewHolder(private val binding: MessagesDisplayLayoutBinding) :
