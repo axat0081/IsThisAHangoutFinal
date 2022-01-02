@@ -38,7 +38,7 @@ class SongRecyclerAdapter(private val listener: OnItemClickListener) :
     }
 
     interface OnItemClickListener {
-        fun onItemClick(post: Song)
+        fun onItemClick(song: Song)
     }
 
     inner class SongViewHolder(private val binding: SongDisplayLayoutBinding) :

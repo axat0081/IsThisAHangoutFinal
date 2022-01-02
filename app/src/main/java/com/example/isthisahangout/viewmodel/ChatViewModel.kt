@@ -8,6 +8,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.example.isthisahangout.MainActivity
+import com.example.isthisahangout.adapter.chat.ChatAdapter
 import com.example.isthisahangout.models.FirebaseMessage
 import com.example.isthisahangout.models.Message
 import com.example.isthisahangout.pagingsource.MessagesPagingSource
@@ -19,7 +20,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -40,88 +44,9 @@ class ChatViewModel @Inject constructor(
             field = value
             state.set("message_text", text)
         }
+
     private val userId = mAuth.currentUser!!.uid
-    val messagesFlow = Pager(PagingConfig(20)) {
-        MessagesPagingSource()
-    }.flow.cachedIn(viewModelScope)
-
-    val isLoading = MutableStateFlow(false)
-    private val lastReceivedMessage: MutableStateFlow<FirebaseMessage?> = MutableStateFlow(null)
-    val messages = Pager(PagingConfig(20)) {
-        chatDao.getMessagesPaged()
-    }.flow.cachedIn(viewModelScope)
-
-    val newMessagesFlow: Flow<List<FirebaseMessage>> =
-        messagesRef.orderBy("time",Query.Direction.DESCENDING)
-            .whereGreaterThanOrEqualTo("time",Timestamp(Date(System.currentTimeMillis())))
-            .asFlow().map {
-                it.toObjects(FirebaseMessage::class.java)
-            }
-
-    init {
-        viewModelScope.launch {
-            val lastMessage = chatDao.getLastMessage()
-            if (lastMessage != null) {
-                isLoading.value = true
-                messagesRef.orderBy("time")
-                    .startAfter(lastMessage)
-                    .get().addOnSuccessListener { snapshots ->
-                        val serverUnreceivedMessages =
-                            snapshots.toObjects(FirebaseMessage::class.java)
-                        if (serverUnreceivedMessages.isNotEmpty()) {
-                            lastReceivedMessage.value = serverUnreceivedMessages.last()
-                        }
-                        viewModelScope.launch {
-                            chatDao.insertMessages(serverUnreceivedMessages.map { firebaseMessage ->
-                                Message(
-                                    id = firebaseMessage.id!!,
-                                    text = firebaseMessage.text!!,
-                                    senderId = firebaseMessage.senderId!!,
-                                    username = firebaseMessage.username!!,
-                                    time = firebaseMessage.time.toDate().time
-                                )
-                            })
-                            Log.e("message_89", "hey there")
-                            isLoading.value = false
-                        }
-                    }.addOnFailureListener {
-                        isLoading.value = false
-                        viewModelScope.launch {
-                            messageChannel.send(MessagingEvent.MessageFetchFailure)
-                        }
-                    }
-            } else {
-                isLoading.value = true
-                messagesRef.orderBy("time")
-                    .get()
-                    .addOnSuccessListener { snapshots ->
-                        val serverUnreceivedMessages =
-                            snapshots.toObjects(FirebaseMessage::class.java)
-                        if (serverUnreceivedMessages.isNotEmpty()) {
-                            lastReceivedMessage.value = serverUnreceivedMessages.last()
-                        }
-                        viewModelScope.launch {
-                            chatDao.insertMessages(serverUnreceivedMessages.map { firebaseMessage ->
-                                Message(
-                                    id = firebaseMessage.id!!,
-                                    text = firebaseMessage.text!!,
-                                    senderId = firebaseMessage.senderId!!,
-                                    username = firebaseMessage.username!!,
-                                    time = firebaseMessage.time.toDate().time
-                                )
-                            })
-                            Log.e("message_118", "hey there")
-                            isLoading.value = false
-                        }
-                    }.addOnFailureListener {
-                        isLoading.value = false
-                        viewModelScope.launch {
-                            messageChannel.send(MessagingEvent.MessageFetchFailure)
-                        }
-                    }
-            }
-        }
-    }
+    val chatAdapter = ChatAdapter()
 
     fun onSendClick() {
         if (text?.isNotEmpty() == true) {
@@ -146,7 +71,6 @@ class ChatViewModel @Inject constructor(
 
     sealed class MessagingEvent {
         data class MessageError(val message: String) : MessagingEvent()
-        object MessageFetchSuccess : MessagingEvent()
-        object MessageFetchFailure : MessagingEvent()
+        object MessageSuccess: MessagingEvent()
     }
 }

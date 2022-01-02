@@ -111,15 +111,17 @@ class SongDetailFragment : Fragment(R.layout.fragment_song_detail) {
                 showDetailsButton.isVisible = false
             }
             viewModel.showDetails.observe(viewLifecycleOwner) {
-                if (it) {
-                    showDetailsButton.setImageResource(R.drawable.hide_details)
-                    showDetailsTextView.text = "Hide Details"
-                    descTextView.text = song.text!!
-                } else {
-                    showDetailsButton.setImageResource(R.drawable.show_details)
-                    showDetailsTextView.text = "Show Details"
-                    descTextView.text =
-                        song.text!!.subSequence(0, Integer.min(10, song.text!!.length - 1))
+                if (song.text != null) {
+                    if (it) {
+                        showDetailsButton.setImageResource(R.drawable.hide_details)
+                        showDetailsTextView.text = "Hide Details"
+                        descTextView.text = song.text!!
+                    } else {
+                        showDetailsButton.setImageResource(R.drawable.show_details)
+                        showDetailsTextView.text = "Show Details"
+                        descTextView.text =
+                            song.text!!.subSequence(0, Integer.min(10, song.text!!.length - 1))
+                    }
                 }
             }
             showDetailsButton.setOnClickListener {

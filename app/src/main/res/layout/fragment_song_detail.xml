@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bgdetails"
     tools:context=".ui.detailsscreen.SongDetailFragment">
 
@@ -55,10 +56,12 @@
                     android:textColor="@color/myblue"
                     tools:text="00:00" />
 
-                <SeekBar
+                <com.google.android.exoplayer2.ui.DefaultTimeBar
                     android:id="@+id/seekbar"
                     android:layout_width="match_parent"
                     android:layout_height="18dp"
+                    app:played_color="@color/mypink"
+                    app:buffered_color="#7d807e"
                     android:layout_toStartOf="@id/song_duration_text_view"
                     android:layout_toEndOf="@id/song_play_postion_text_view"
                     android:foregroundTint="@color/mypink" />
