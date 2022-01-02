@@ -14,10 +14,9 @@ import com.example.isthisahangout.utils.firebaseAuth
 import com.example.isthisahangout.utils.newChatMessagesQuery
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Query
-import java.util.*
 
 fun Query.whereAfterTimestamp(): Query =
-    whereGreaterThan("timestamp", Timestamp.now())
+    whereGreaterThan("time", Timestamp.now())
 
 class ChatAdapter(
 ) : FirestoreRealTimePaginationAdapter<FirebaseMessage, ChatAdapter.ViewHolder>(
@@ -36,7 +35,10 @@ class ChatAdapter(
             override fun compare(a: FirebaseMessage, b: FirebaseMessage): Int =
                 a.time.compareTo(b.time)
 
-            override fun areContentsTheSame(oldItem: FirebaseMessage, newItem: FirebaseMessage): Boolean =
+            override fun areContentsTheSame(
+                oldItem: FirebaseMessage,
+                newItem: FirebaseMessage
+            ): Boolean =
                 oldItem.text == newItem.text
 
             override fun areItemsTheSame(item1: FirebaseMessage, item2: FirebaseMessage): Boolean =
@@ -45,7 +47,7 @@ class ChatAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): ViewHolder =
         ViewHolder(
-            MessagesDisplayLayoutBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+            MessagesDisplayLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -58,29 +60,26 @@ class ChatAdapter(
     inner class ViewHolder(private val binding: MessagesDisplayLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bindData(message: FirebaseMessage) { binding.apply {
-            if (message.senderId == firebaseAuth.currentUser!!.uid) {
-                linearLayout1.isVisible = false
-                sentByTextView.text = message.username
-                messageSentTextView.text =
-                    message.text + "\n\n" + android.text.format.DateFormat.format(
-                        "yyyy-MM-dd hh:mm a",
-                        message.time.toDate()
-                    ).toString()
-            } else {
-                linearLayout2.isVisible = false
-                usernameTextView.text = message.username
-                messageReceivedTextView.text =
-                    message.text + "\n\n" + android.text.format.DateFormat.format(
-                        "yyyy-MM-dd hh:mm a",
-                        message.time.toDate()
-                    ).toString()
+        fun bindData(message: FirebaseMessage) {
+            binding.apply {
+                if (message.senderId == firebaseAuth.currentUser!!.uid) {
+                    linearLayout1.isVisible = false
+                    sentByTextView.text = message.username
+                    messageSentTextView.text =
+                        message.text + "\n\n" + android.text.format.DateFormat.format(
+                            "yyyy-MM-dd hh:mm a",
+                            message.time.toDate()
+                        ).toString()
+                } else {
+                    linearLayout2.isVisible = false
+                    usernameTextView.text = message.username
+                    messageReceivedTextView.text =
+                        message.text + "\n\n" + android.text.format.DateFormat.format(
+                            "yyyy-MM-dd hh:mm a",
+                            message.time.toDate()
+                        ).toString()
+                }
             }
-        }
-        }
-
-        private fun formatTimestamp(date: Date): String {
-            return android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss a", date).toString()
         }
     }
 }

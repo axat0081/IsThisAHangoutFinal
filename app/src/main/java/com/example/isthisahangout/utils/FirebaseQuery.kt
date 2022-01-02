@@ -1,6 +1,6 @@
 package com.example.isthisahangout.utils
 
-import com.example.isthisahangout.adapter.whereAfterTimestamp
+import com.example.isthisahangout.adapter.chat.whereAfterTimestamp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
